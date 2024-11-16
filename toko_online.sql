@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 16 Nov 2024 pada 11.22
+-- Waktu pembuatan: 16 Nov 2024 pada 12.12
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -51,13 +51,12 @@ CREATE TABLE `detailcheckout` (
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `location`
+-- Struktur dari tabel `kategori`
 --
 
-CREATE TABLE `location` (
-  `location_id` int(10) NOT NULL,
-  `kota` text NOT NULL,
-  `jalan` text NOT NULL
+CREATE TABLE `kategori` (
+  `kategori_id` int(10) NOT NULL,
+  `nama_kategori` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -83,8 +82,8 @@ CREATE TABLE `products` (
   `nama_product` text NOT NULL,
   `harga_satuan` int(10) NOT NULL,
   `deskripsi` text NOT NULL,
-  `kategori_product` text NOT NULL,
-  `stock_product` int(10) NOT NULL
+  `stock_product` int(10) NOT NULL,
+  `kategori_id` int(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -99,7 +98,7 @@ CREATE TABLE `users` (
   `password` text NOT NULL,
   `user_telp` int(15) NOT NULL,
   `email` text NOT NULL,
-  `location_id` int(10) NOT NULL,
+  `alamat` text NOT NULL,
   `isAdmin` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -124,10 +123,10 @@ ALTER TABLE `detailcheckout`
   ADD KEY `checkout_id_fk` (`checkout_id`);
 
 --
--- Indeks untuk tabel `location`
+-- Indeks untuk tabel `kategori`
 --
-ALTER TABLE `location`
-  ADD PRIMARY KEY (`location_id`);
+ALTER TABLE `kategori`
+  ADD PRIMARY KEY (`kategori_id`);
 
 --
 -- Indeks untuk tabel `payment`
@@ -139,14 +138,14 @@ ALTER TABLE `payment`
 -- Indeks untuk tabel `products`
 --
 ALTER TABLE `products`
-  ADD PRIMARY KEY (`product_id`);
+  ADD PRIMARY KEY (`product_id`),
+  ADD KEY `kategori_id` (`kategori_id`);
 
 --
 -- Indeks untuk tabel `users`
 --
 ALTER TABLE `users`
-  ADD PRIMARY KEY (`user_id`),
-  ADD KEY `location_id` (`location_id`);
+  ADD PRIMARY KEY (`user_id`);
 
 --
 -- AUTO_INCREMENT untuk tabel yang dibuang
@@ -165,10 +164,10 @@ ALTER TABLE `detailcheckout`
   MODIFY `detail_id` int(10) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT untuk tabel `location`
+-- AUTO_INCREMENT untuk tabel `kategori`
 --
-ALTER TABLE `location`
-  MODIFY `location_id` int(10) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `kategori`
+  MODIFY `kategori_id` int(10) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT untuk tabel `payment`
@@ -207,10 +206,10 @@ ALTER TABLE `detailcheckout`
   ADD CONSTRAINT `product_id_fk` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`);
 
 --
--- Ketidakleluasaan untuk tabel `users`
+-- Ketidakleluasaan untuk tabel `products`
 --
-ALTER TABLE `users`
-  ADD CONSTRAINT `location_id` FOREIGN KEY (`location_id`) REFERENCES `location` (`location_id`);
+ALTER TABLE `products`
+  ADD CONSTRAINT `kategori_id` FOREIGN KEY (`kategori_id`) REFERENCES `kategori` (`kategori_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

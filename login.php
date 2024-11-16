@@ -60,9 +60,7 @@ session_start();
                 </div>
             </form>
         </div>
-
     </section>
-
 
     <?php
 

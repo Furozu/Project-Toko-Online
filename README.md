@@ -8,5 +8,3 @@ To Do List:
 - Connect website with database...(missing)
 - Create all function with PHP.........(missing)
 - Testing Phase...............................(not yet)
-
-Push test

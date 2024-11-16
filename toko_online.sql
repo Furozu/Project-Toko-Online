@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 16 Nov 2024 pada 07.43
+-- Waktu pembuatan: 16 Nov 2024 pada 11.22
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -79,8 +79,10 @@ CREATE TABLE `payment` (
 
 CREATE TABLE `products` (
   `product_id` int(10) NOT NULL,
+  `gambar` text NOT NULL,
   `nama_product` text NOT NULL,
   `harga_satuan` int(10) NOT NULL,
+  `deskripsi` text NOT NULL,
   `kategori_product` text NOT NULL,
   `stock_product` int(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

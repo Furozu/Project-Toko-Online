@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 16 Nov 2024 pada 12.12
+-- Waktu pembuatan: 19 Nov 2024 pada 08.34
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -59,6 +59,15 @@ CREATE TABLE `kategori` (
   `nama_kategori` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data untuk tabel `kategori`
+--
+
+INSERT INTO `kategori` (`kategori_id`, `nama_kategori`) VALUES
+(1, 'Makanan'),
+(2, 'Kebersihan'),
+(3, 'Alat');
+
 -- --------------------------------------------------------
 
 --
@@ -69,6 +78,15 @@ CREATE TABLE `payment` (
   `payment_id` int(11) NOT NULL,
   `payment_method` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `payment`
+--
+
+INSERT INTO `payment` (`payment_id`, `payment_method`) VALUES
+(1, 'Qris'),
+(2, 'Kredit'),
+(3, 'Debit');
 
 -- --------------------------------------------------------
 
@@ -86,6 +104,17 @@ CREATE TABLE `products` (
   `kategori_id` int(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data untuk tabel `products`
+--
+
+INSERT INTO `products` (`product_id`, `gambar`, `nama_product`, `harga_satuan`, `deskripsi`, `stock_product`, `kategori_id`) VALUES
+(1, 'https://jasindo.co.id/uploads/media/lvqceq27yqgfrux4qxahhdqor-beraspng', 'Beras 5kg', 72500, 'Beras putih premium 5kg', 25, 1),
+(2, 'https://dk4fkkwa4o9l0.cloudfront.net/production/uploads/article/image/1061/Tanpa_judul__1920_x_1080_px___1920_x_1080_px___1080_x_1920_px___1920_x_1080_px___8_.jpg', 'Minyak Goreng 1L', 25000, 'Minyak goreng premium yang melewati proses pemurnian', 80, 1),
+(3, 'https://cdn1-production-images-kly.akamaized.net/6owxF4qupsKGTdeWri1-hD-UURc=/1200x675/smart/filters:quality(75):strip_icc():format(jpeg)/kly-media-production/medias/1295184/original/070904600_1469165488-sabun_cuci_piring_2_copy.jpg', 'Sabun Cuci Piring 650ml', 18800, 'Sabun cuci piring / pembersih alat dapur', 40, 2),
+(4, 'https://asset.kompas.com/crops/afdljRaqodyDXZ7tHTQCTwmuMvc=/0x0:1000x667/1200x800/data/photo/2024/02/22/65d6e36c6faa2.jpg', 'Wajan', 250000, 'Wajan anti lengket high quality', 10, 3),
+(5, 'https://tokokadounik.com/assets/images/produk/spatula_stainless_steel_set_6_in_1_sodet_sutil_alat_masak_dapur_stainless_ec803a228b.jpg', 'Spatula Set 6 In 1', 180000, 'Spatula stainless steel set 6 in 1 peralatan dapur stainless', 15, 3);
+
 -- --------------------------------------------------------
 
 --
@@ -101,6 +130,16 @@ CREATE TABLE `users` (
   `alamat` text NOT NULL,
   `isAdmin` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `users`
+--
+
+INSERT INTO `users` (`user_id`, `username`, `password`, `user_telp`, `email`, `alamat`, `isAdmin`) VALUES
+(1, 'Admin', 'admin123', 1234567890, 'admin123@email.com', 'Surabaya, Jalan TekWeb 5A', 1),
+(2, 'Joseph', '123', 1876543210, 'joseph@email.com', 'Surabaya, Jalan To Iron', 0),
+(3, 'Fendi', '321', 2147483647, 'fendi@email.com', 'Surabaya, Jalan HOH', 0),
+(4, 'Sean', '12345', 1783456921, 'sean@email.com', 'Jakarta, Jalan Ketiduran', 0);
 
 --
 -- Indexes for dumped tables
@@ -167,25 +206,25 @@ ALTER TABLE `detailcheckout`
 -- AUTO_INCREMENT untuk tabel `kategori`
 --
 ALTER TABLE `kategori`
-  MODIFY `kategori_id` int(10) NOT NULL AUTO_INCREMENT;
+  MODIFY `kategori_id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT untuk tabel `payment`
 --
 ALTER TABLE `payment`
-  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT untuk tabel `products`
 --
 ALTER TABLE `products`
-  MODIFY `product_id` int(10) NOT NULL AUTO_INCREMENT;
+  MODIFY `product_id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(10) NOT NULL AUTO_INCREMENT;
+  MODIFY `user_id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)

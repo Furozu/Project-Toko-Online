@@ -1,10 +1,7 @@
 <?php
-
 require_once "connect.php";
 session_start();
-
 ?>
-
 
 <!doctype html>
 <html lang="en">
@@ -62,10 +59,62 @@ session_start();
         </div>
     </section>
 
+    <section class="container mx-auto my-10">
+        <?php
+        echo '<table class="table-auto w-full border-collapse border border-gray-300">';
+        echo '<thead>';
+        echo '<tr class="bg-gray-200">';
+        echo '<th class="border border-gray-300 px-4 py-2 text-left">Username</th>';
+        echo '<th class="border border-gray-300 px-4 py-2 text-left">Password</th>';
+        echo '<th class="border border-gray-300 px-4 py-2 text-left">Telp</th>';
+        echo '<th class="border border-gray-300 px-4 py-2 text-left">Email</th>';
+        echo '<th class="border border-gray-300 px-4 py-2 text-left">Alamat</th>';
+        echo '<th class="border border-gray-300 px-4 py-2 text-left">isAdmin</th>';
+        echo '</tr>';
+        echo '</thead>';
+        echo '<tbody>';
+
+        $stmt = $mysqli->query("SELECT user_id, username, password, user_telp, email, alamat, isAdmin FROM users");
+        while ($row = $stmt->fetch_assoc()) {
+            echo '<tr class="hover:bg-gray-100">';
+            echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['username']) . '</td>';
+            echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['password']) . '</td>';
+            echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['user_telp']) . '</td>';
+            echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['email']) . '</td>';
+            echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['alamat']) . '</td>';
+            echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['isAdmin']) . '</td>';
+            echo '</tr>';
+        }
+        echo '</tbody>';
+        echo '</table>';
+        ?>
+    </section>
+
+    <!-- TODO: Test login function -->
     <?php
+    $login = 0;
+    $isAdmin = 0;
+    $name = "";
+    $isiNama = "";
 
-    // php code here
+    $result = $mysqli->query("SELECT id,username,password,isAdmin FROM users");
+    // Untuk check semua pasangan username dan password
+    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {         
 
+        // check pasangan username dan password
+        if (isset($_POST['username'])) {
+            if ($_POST['username'] == $row['username'] && $_POST['password'] == $row['password']) {
+                $name = $_POST['username'];
+                $_SESSION['username'] = $name;
+                $login = 1;
+
+                if ($row['isAdmin'] == '1') {
+                    $isAdmin = 1;
+                }
+                break;
+            }
+        }
+    }
     ?>
 
 </body>

@@ -26,40 +26,134 @@ session_start();
 </head>
 
 <body>
-
     <section class="p-10 grid grid-cols-2 gap-10 place-items-center">
         <div>
             <p class="text-9xl font-bold">Toko Online</p>
         </div>
 
         <div class="size-full">
-            <form class="grid grid-rows-4 gap-3">
+            <form class="grid grid-rows-4 gap-3" method="post">
                 <div>
                     <p class="text-5xl font-bold">Log In</p>
                 </div>
 
+                <?php
+                $login = 0;
+                $isAdmin = 0;
+
+                if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_POST['name']) && !empty($_POST['pass'])) {
+                    // TODO: Test login function
+
+                    $result = $mysqli->query("SELECT user_id,username,password,isAdmin FROM users");
+                    // Untuk check semua pasangan username dan password
+                    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+
+                        // check pasangan username dan password
+                        if ($_POST['name'] == $row['username'] && $_POST['pass'] == $row['password']) {
+                            $login = 1;
+
+                            if ($row['isAdmin'] == '1') {
+                                $isAdmin = 1;
+                            }
+                            break;
+                        }
+                    }
+
+                    if ($login == 0) {
+                        echo '<div class="alert alert-danger">Login Failed</div>';
+                    } else if ($isAdmin == 1) {
+                        echo '<div class="alert alert-success">Welcome Admin</div>';
+                        // header('Location: admin.php');
+                    } else if ($login == 1) {
+                        echo '<div class="alert alert-success">Login Success</div>';
+                        // header('Location: home.php');
+                    }
+                }
+                ?>
+
+                <!-- Login Username -->
                 <div class="form-group">
                     <label class="pb-1" for="usernameInput">Username</label>
-                    <input class="form-control" id="usernameInput" placeholder="Enter Username">
+                    <input class="form-control" name="name" id="usernameInput" placeholder="Enter Username">
                 </div>
+
 
                 <div class="form-group">
                     <label class="pb-1" for="passwordInput">Password</label>
-                    <input type="password" class="form-control" id="passwordInput" placeholder="Password">
+                    <input type="password" class="form-control" name="pass" id="passwordInput" placeholder="Enter Password">
                 </div>
 
                 <div>
                     <div>
                         <button type="submit" class="size-full btn btn-primary">LOG IN</button>
                     </div>
-
-                    <p class="mt-1">Create <a class="link-underline text-blue-600" href="">New Account?</a></p>
-                </div>
             </form>
+
+            <!-- Create new account MODAL -->
+            <p class="mt-1">Create <a class="link-underline text-blue-600" href="#" data-bs-toggle="modal" data-bs-target="#createAccountModal">New Account?</a></p>
+
+            <!-- MODAL -->
+            <div class="modal fade bd-example-modal-lg" id="createAccountModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="myLargeModalLabel">Daftar</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <!-- Form for creating a new account -->
+                            <form method="post">
+                                <div class="form-group mb-3">
+                                    <label for="newUsername">Username</label>
+                                    <input type="text" class="form-control" id="newUsername" name="newUsername" placeholder="Enter Username" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="newPassword">Password</label>
+                                    <input type="password" class="form-control" id="newPassword" name="newPassword" placeholder="Enter Password" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="newTelpon">Nomer Telpon</label>
+                                    <input type="text" class="form-control" id="newTelpon" name="newTelpon" placeholder="Enter Nomer Telpon" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="newEmail">Email</label>
+                                    <input type="email" class="form-control" id="newEmail" name="newEmail" placeholder="Enter Email" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="newAlamat">Alamat</label>
+                                    <textarea class="form-control" id="newAlamat" name="newAlamat" rows="3" placeholder="Enter Alamat" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Create Account</button>
+                            </form>
+                        </div>
+
+                        <?php
+                        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['newUsername']) && isset($_POST['newPassword']) && isset($_POST['newTelpon']) && isset($_POST['newEmail']) && isset($_POST['newAlamat'])) {
+                            $nName = $_POST['newUsername'];
+                            $nPass = $_POST['newPassword'];
+                            $nTelp = $_POST['newTelpon'];
+                            $nEmail = $_POST['newEmail'];
+                            $nAlamat = $_POST['newAlamat'];
+
+                            $sql = "INSERT INTO users (username,password,user_telp,email,alamat,isAdmin) VALUES (?,?,?,?,?,0)";
+                            $stmt = $mysqli->prepare($sql);
+                            $stmt->bind_param("sssss", $nName, $nPass, $nTelp, $nEmail, $nAlamat);
+
+                            if ($stmt->execute()) {
+                                // header('Location: home.php');
+                                exit();
+                            }
+                        }
+                        ?>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
     <section class="container mx-auto my-10">
+        <h1>Tabel Users utk Testing</h1>
         <?php
         echo '<table class="table-auto w-full border-collapse border border-gray-300">';
         echo '<thead>';
@@ -89,33 +183,6 @@ session_start();
         echo '</table>';
         ?>
     </section>
-
-    <!-- TODO: Test login function -->
-    <?php
-    $login = 0;
-    $isAdmin = 0;
-    $name = "";
-    $isiNama = "";
-
-    $result = $mysqli->query("SELECT id,username,password,isAdmin FROM users");
-    // Untuk check semua pasangan username dan password
-    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {         
-
-        // check pasangan username dan password
-        if (isset($_POST['username'])) {
-            if ($_POST['username'] == $row['username'] && $_POST['password'] == $row['password']) {
-                $name = $_POST['username'];
-                $_SESSION['username'] = $name;
-                $login = 1;
-
-                if ($row['isAdmin'] == '1') {
-                    $isAdmin = 1;
-                }
-                break;
-            }
-        }
-    }
-    ?>
 
 </body>
 

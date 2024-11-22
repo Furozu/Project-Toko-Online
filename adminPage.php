@@ -51,19 +51,17 @@ session_start();
     </nav>
 
     <section class="container-full">
-        <div class="row">
-            <div class="col-lg-3">
-                testing1
+        <br><br>
+        <div class="row justify-items-between">
+            <div class="col-lg-3 justify-items-center"></div>
+            <div class="col-lg-3 justify-items-center px-4">
+                <p class="h4 p-10 bg-primary text-white rounded">CREATE NEW PRODUCT</p>
             </div>
-            <div class="col-lg-3">
-                testing1
+            <div class="col-lg-3 justify-items-center p-20 bg-primary text-white rounded">
+                <p class="h4">UPDATE PRODUCT</p>
             </div>
-            <div class="col-lg-3">
-                testing1
-            </div>
-            <div class="col-lg-3">
-                testing1
-            </div>
+            <div class="col-lg-3 justify-items-center">tes</div>
+
         </div>
     </section>
 

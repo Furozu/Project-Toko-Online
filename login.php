@@ -42,7 +42,6 @@ session_start();
                 $isAdmin = 0;
 
                 if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_POST['name']) && !empty($_POST['pass'])) {
-                    // TODO: Test login function
 
                     $result = $mysqli->query("SELECT user_id,username,password,isAdmin FROM users");
                     // Untuk check semua pasangan username dan password

@@ -26,9 +26,48 @@ session_start();
 </head>
 
 <body>
-    
+    <!-- navbar -->
+    <nav class="gap-4 navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand pl-12" href="#">Toko Online</a>
+        <div class="navbar justify-content-between">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">History</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">Admin</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Admin History</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="container-full">
+        <div class="row">
+            <div class="col-lg-3">
+                testing1
+            </div>
+            <div class="col-lg-3">
+                testing1
+            </div>
+            <div class="col-lg-3">
+                testing1
+            </div>
+            <div class="col-lg-3">
+                testing1
+            </div>
+        </div>
+    </section>
+
     <section class="container mx-auto my-10">
-        <h1>Tabel Users utk Testing</h1>
         <?php
         echo '<table class="table-auto w-full border-collapse border border-gray-300">';
         echo '<thead>';

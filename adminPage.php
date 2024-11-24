@@ -50,6 +50,7 @@ session_start();
         </div>
     </nav>
 
+    <!-- buttons -->
     <section class="container-full">
         <br><br>
         <div class="row justify-items-between">
@@ -63,7 +64,6 @@ session_start();
             <div class="col-lg-3 justify-items-center "></div>
 
         </div>
-
         <div class="row justify-items-between">
             <div class="col-lg-3 justify-items-center"></div>
             <div class="col-lg-3 justify-items-center p-8">

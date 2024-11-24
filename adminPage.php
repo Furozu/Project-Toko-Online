@@ -27,24 +27,24 @@ session_start();
 
 <body>
     <!-- navbar -->
-    <nav class="gap-4 navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand pl-12" href="#">Toko Online</a>
+    <nav class="gap-4 navbar navbar-expand-lg navbar-light bg-dark">
+        <a class="navbar-brand pl-12 text-warning" href="#">Toko Online</a>
         <div class="navbar justify-content-between">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Profile</a>
+                    <a class="nav-link text-warning" href="#">Profile</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Home</a>
+                    <a class="nav-link text-warning" href="#">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">History</a>
+                    <a class="nav-link text-warning" href="#">History</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" href="#">Admin</a>
+                    <a class="nav-link active text-white fw-bold" href="#">Admin</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Admin History</a>
+                    <a class="nav-link text-warning" href="#">Admin History</a>
                 </li>
             </ul>
         </div>
@@ -54,13 +54,25 @@ session_start();
         <br><br>
         <div class="row justify-items-between">
             <div class="col-lg-3 justify-items-center"></div>
-            <div class="col-lg-3 justify-items-center px-4">
-                <p class="h4 p-10 bg-primary text-white rounded">CREATE NEW PRODUCT</p>
+            <div class="col-lg-3 justify-items-center p-8">
+                <p class="h4 p-10 bg-warning rounded fw-bold">CREATE NEW PRODUCT</p>
             </div>
-            <div class="col-lg-3 justify-items-center p-20 bg-primary text-white rounded">
-                <p class="h4">UPDATE PRODUCT</p>
+            <div class="col-lg-3 justify-items-center p-8">
+                <p class="h4 p-10 bg-warning text-white rounded fw-bold">CREATE NEW PRODUCT</p>
             </div>
-            <div class="col-lg-3 justify-items-center">tes</div>
+            <div class="col-lg-3 justify-items-center "></div>
+
+        </div>
+
+        <div class="row justify-items-between">
+            <div class="col-lg-3 justify-items-center"></div>
+            <div class="col-lg-3 justify-items-center p-8">
+                <p class="h4 p-10 bg-warning text-white rounded fw-bold">CREATE NEW PRODUCT</p>
+            </div>
+            <div class="col-lg-3 justify-items-center p-8">
+                <p class="h4 p-10 bg-warning rounded fw-bold">CREATE NEW PRODUCT</p>
+            </div>
+            <div class="col-lg-3 justify-items-center"></div>
 
         </div>
     </section>

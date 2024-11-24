@@ -27,24 +27,36 @@ session_start();
 
 <body>
     <!-- navbar -->
-    <nav class="gap-4 navbar navbar-expand-lg navbar-light bg-dark">
-        <a class="navbar-brand pl-12 text-warning" href="#">Toko Online</a>
+    <nav class="gap-4 navbar sticky fixed-top navbar-expand-lg navbar-light bg-dark">
+        <a class="navbar-brand pl-12 text-warning" href="#">
+            <p>Toko Online</p>
+        </a>
         <div class="navbar justify-content-between">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <a class="nav-link text-warning" href="#">Profile</a>
+                    <a class="nav-link text-warning" href="#">
+                        <p class="hover:text-white hover:font-semibold">Profile</p>
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-warning" href="#">Home</a>
+                    <a class="nav-link text-warning" href="#">
+                        <p class="hover:text-white hover:font-semibold">Home</p>
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-warning" href="#">History</a>
+                    <a class="nav-link text-warning" href="#">
+                        <p class="hover:text-white hover:font-semibold">History</p>
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active text-white fw-bold" href="#">Admin</a>
+                    <a class="nav-link active text-white fw-bold" href="#">
+                        <p>Admin</p>
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-warning" href="#">Admin History</a>
+                    <a class="nav-link text-warning" href="#">
+                        <p class="hover:text-white hover:font-semibold">Admin History</p>
+                    </a>
                 </li>
             </ul>
         </div>
@@ -54,28 +66,86 @@ session_start();
     <section class="container-full">
         <br><br>
         <div class="row justify-items-between">
-            <div class="col-lg-3 justify-items-center"></div>
-            <div class="col-lg-3 justify-items-center p-8">
-                <p class="h4 p-10 bg-warning rounded fw-bold">CREATE NEW PRODUCT</p>
-            </div>
-            <div class="col-lg-3 justify-items-center p-8">
-                <p class="h4 p-10 bg-warning text-white rounded fw-bold">CREATE NEW PRODUCT</p>
-            </div>
-            <div class="col-lg-3 justify-items-center "></div>
 
-        </div>
-        <div class="row justify-items-between">
-            <div class="col-lg-3 justify-items-center"></div>
             <div class="col-lg-3 justify-items-center p-8">
-                <p class="h4 p-10 bg-warning text-white rounded fw-bold">CREATE NEW PRODUCT</p>
+                <a class="text-center" href="#" data-bs-toggle="modal" data-bs-target="#createproductmodal">
+                    <p class="h4 p-10 bg-warning rounded fw-bold hover:text-white"> CREATE NEW PRODUCT</p>
+                </a>
             </div>
             <div class="col-lg-3 justify-items-center p-8">
-                <p class="h4 p-10 bg-warning rounded fw-bold">CREATE NEW PRODUCT</p>
+                <a class="text-center" href="#" data-bs-toggle="modal" data-bs-target="#createproductmodal">
+                    <p class="h4 p-10 bg-warning rounded fw-bold hover:text-white"> UPDATE PRODUCT</p>
+                </a>
             </div>
-            <div class="col-lg-3 justify-items-center"></div>
-
+            <div class="col-lg-3 justify-items-center p-8">
+                <a class="text-center" href="#" data-bs-toggle="modal" data-bs-target="#createproductmodal">
+                    <p class="h4 p-10 bg-warning rounded fw-bold hover:text-white"> DELETE PRODUCT</p>
+                </a>
+            </div>
+            <div class="col-lg-3 justify-items-center p-8">
+                <a class="text-center" href="#" data-bs-toggle="modal" data-bs-target="#createproductmodal">
+                    <p class="h4 p-10 bg-warning rounded fw-bold hover:text-white"> LIST PRODUCT</p>
+                </a>
+            </div>
         </div>
     </section>
+    <!-- pop up create product -->
+    <div class="modal fade bd-example-modal-lg" id="createproductmodal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myLargeModalLabel">Daftar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal2" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Form for creating a new account -->
+                    <form method="post">
+                        <div class="form-group mb-3">
+                            <label for="newImage">Gambar</label>
+                            <input type="text" class="form-control" id="newImage" name="newImage" placeholder="Enter ImageAddress" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="newBarang">Nama barang</label>
+                            <input type="text" class="form-control" id="newBarang" name="newBarang" placeholder="Enter Nama Barang" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="newHarga">Harga Satuan</label>
+                            <input type="text" class="form-control" id="newHarga" name="newHarga" placeholder="Enter Harga Satuan" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="newDeskripsi">Deskripsi</label>
+                            <textarea class="form-control" id="newDeskripsi" name="newDeskirpsi" rows="3" placeholder="Enter Deskripsi" required></textarea>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="newStock">Stock</label>
+                            <input type="text" class="form-control" id="newStock" name="newStock" placeholder="Enter Stock" required>
+                        </div>
+                        <button type="submit" class="btn btn-warning">Add Product</button>
+                    </form>
+                </div>
+
+                <?php
+                if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['newUsername']) && isset($_POST['newPassword']) && isset($_POST['newTelpon']) && isset($_POST['newEmail']) && isset($_POST['newAlamat'])) {
+                    $nName = $_POST['newUsername'];
+                    $nPass = $_POST['newPassword'];
+                    $nTelp = $_POST['newTelpon'];
+                    $nEmail = $_POST['newEmail'];
+                    $nAlamat = $_POST['newAlamat'];
+
+                    $sql = "INSERT INTO users (username,password,user_telp,email,alamat,isAdmin) VALUES (?,?,?,?,?,0)";
+                    $stmt = $mysqli->prepare($sql);
+                    $stmt->bind_param("sssss", $nName, $nPass, $nTelp, $nEmail, $nAlamat);
+
+                    if ($stmt->execute()) {
+                        // header('Location: home.php');
+                        exit();
+                    }
+                }
+                ?>
+            </div>
+        </div>
+    </div>
 
     <section class="container mx-auto my-10">
         <?php
@@ -107,6 +177,8 @@ session_start();
         echo '</table>';
         ?>
     </section>
+
+    <br><br><br><br><br><br><br><br><br><br>
 </body>
 
 </html>

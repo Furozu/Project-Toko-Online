@@ -26,37 +26,22 @@ session_start();
 </head>
 
 <body>
-    <!-- navbar -->
-    <nav class="gap-4 navbar sticky fixed-top navbar-expand-lg navbar-light bg-dark">
-        <a class="navbar-brand pl-12 text-warning" href="#">
-            <p>Toko Online</p>
-        </a>
+     <!-- navbar -->
+     <nav class="navbar navbar-expand-lg navbar-light bg-dark sticky fixed-top gap-2">
+        <a class="navbar-brand pl-12 text-yellow-400 hover:text-white hover:font-semibold" href="home.php">Toko Online</a>
         <div class="navbar justify-content-between">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    <a class="nav-link text-warning" href="#">
-                        <p class="hover:text-white hover:font-semibold">Profile</p>
-                    </a>
+            <ul class="navbar-nav mr-auto gap-3">
+                <li class="nav-item"><!-- TODO: belum connect -->
+                    <a class="nav-link text-yellow-400 hover:text-white hover:font-semibold" href="">Profile</a>
+                </li>
+                <li class="nav-item"><!-- TODO: belum connect -->
+                    <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="">History</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-warning" href="#">
-                        <p class="hover:text-white hover:font-semibold">Home</p>
-                    </a>
+                    <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="adminPage.php">Admin</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link text-warning" href="#">
-                        <p class="hover:text-white hover:font-semibold">History</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active text-white fw-bold" href="#">
-                        <p>Admin</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-warning" href="#">
-                        <p class="hover:text-white hover:font-semibold">Admin History</p>
-                    </a>
+                <li class="nav-item"><!-- TODO: belum connect -->
+                    <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="">Admin History</a>
                 </li>
             </ul>
         </div>

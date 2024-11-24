@@ -62,10 +62,10 @@ session_start();
                         echo '<div class="alert alert-danger">Login Failed</div>';
                     } else if ($isAdmin == 1) {
                         echo '<div class="alert alert-success">Welcome Admin</div>';
-                        // header('Location: admin.php');
+                        header('Location: adminPage.php');
                     } else if ($login == 1) {
                         echo '<div class="alert alert-success">Login Success</div>';
-                        // header('Location: home.php');
+                        header('Location: home.php');
                     }
                 }
                 ?>
@@ -89,7 +89,7 @@ session_start();
             </form>
 
             <!-- Create new account MODAL -->
-            <p class="mt-1">Create <a class="link-underline text-blue-600" href="#" data-bs-toggle="modal" data-bs-target="#createAccountModal">New Account?</a></p>
+            <p class="mt-1">Create <a class="link-underline text-blue-600" href="" data-bs-toggle="modal" data-bs-target="#createAccountModal">New Account?</a></p>
 
             <!-- MODAL -->
             <div class="modal fade bd-example-modal-lg" id="createAccountModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">

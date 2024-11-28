@@ -35,7 +35,7 @@ session_start();
                     <a class="nav-link text-yellow-400 hover:text-white hover:font-semibold" href="">Profile</a>
                 </li>
                 <li class="nav-item"><!-- TODO: belum connect -->
-                    <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="">History</a>
+                    <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="history.php">History</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="adminPage.php">Admin</a>

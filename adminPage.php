@@ -26,8 +26,8 @@ session_start();
 </head>
 
 <body>
-     <!-- navbar -->
-     <nav class="navbar navbar-expand-lg navbar-light bg-dark sticky fixed-top gap-2">
+    <!-- navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-dark sticky fixed-top gap-2">
         <a class="navbar-brand pl-12 text-yellow-400 hover:text-white hover:font-semibold" href="home.php">Toko Online</a>
         <div class="navbar justify-content-between">
             <ul class="navbar-nav mr-auto gap-3">
@@ -54,116 +54,218 @@ session_start();
 
             <div class="col-lg-3 justify-items-center p-8">
                 <a class="text-center" href="#" data-bs-toggle="modal" data-bs-target="#createproductmodal">
-                    <p class="h4 p-10 bg-warning rounded fw-bold hover:text-white"> CREATE NEW PRODUCT</p>
+                    <p class="h4 p-10 bg-warning rounded fw-bold hover:text-white" onclick="create()"> CREATE NEW PRODUCT</p>
                 </a>
             </div>
             <div class="col-lg-3 justify-items-center p-8">
-                <a class="text-center" href="#" data-bs-toggle="modal" data-bs-target="#createproductmodal">
-                    <p class="h4 p-10 bg-warning rounded fw-bold hover:text-white"> UPDATE PRODUCT</p>
+                <a class="text-center" href="#">
+                    <p class="h4 p-10 bg-warning rounded fw-bold hover:text-white" onclick="update()"> UPDATE PRODUCT</p>
                 </a>
             </div>
             <div class="col-lg-3 justify-items-center p-8">
-                <a class="text-center" href="#" data-bs-toggle="modal" data-bs-target="#createproductmodal">
-                    <p class="h4 p-10 bg-warning rounded fw-bold hover:text-white"> DELETE PRODUCT</p>
+                <a class="text-center" href="#">
+                    <p class="h4 p-10 bg-warning rounded fw-bold hover:text-white" onclick="editAdmin()"> SHOW USERS</p>
                 </a>
             </div>
             <div class="col-lg-3 justify-items-center p-8">
-                <a class="text-center" href="#" data-bs-toggle="modal" data-bs-target="#createproductmodal">
-                    <p class="h4 p-10 bg-warning rounded fw-bold hover:text-white"> LIST PRODUCT</p>
+                <a class="text-center" href="#">
+                    <p class="h4 p-10 bg-warning rounded fw-bold hover:text-white" onclick="listItem()"> SHOW PRODUCTS</p>
                 </a>
             </div>
         </div>
-    </section>
-    <!-- pop up create product -->
-    <div class="modal fade bd-example-modal-lg" id="createproductmodal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="myLargeModalLabel">Daftar</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal2" aria-label="Close"></button>
-                </div>
-
-                <div class="modal-body">
-                    <!-- Form for creating a new account -->
-                    <form method="post">
-                        <div class="form-group mb-3">
-                            <label for="newImage">Gambar</label>
-                            <input type="text" class="form-control" id="newImage" name="newImage" placeholder="Enter ImageAddress" required>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="newBarang">Nama barang</label>
-                            <input type="text" class="form-control" id="newBarang" name="newBarang" placeholder="Enter Nama Barang" required>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="newHarga">Harga Satuan</label>
-                            <input type="text" class="form-control" id="newHarga" name="newHarga" placeholder="Enter Harga Satuan" required>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="newDeskripsi">Deskripsi</label>
-                            <textarea class="form-control" id="newDeskripsi" name="newDeskirpsi" rows="3" placeholder="Enter Deskripsi" required></textarea>
-                        </div>
-                        <div class="form-group mb-3">
-                            <label for="newStock">Stock</label>
-                            <input type="text" class="form-control" id="newStock" name="newStock" placeholder="Enter Stock" required>
-                        </div>
-                        <button type="submit" class="btn btn-warning">Add Product</button>
-                    </form>
-                </div>
-
-                <?php
-                if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['newUsername']) && isset($_POST['newPassword']) && isset($_POST['newTelpon']) && isset($_POST['newEmail']) && isset($_POST['newAlamat'])) {
-                    $nName = $_POST['newUsername'];
-                    $nPass = $_POST['newPassword'];
-                    $nTelp = $_POST['newTelpon'];
-                    $nEmail = $_POST['newEmail'];
-                    $nAlamat = $_POST['newAlamat'];
-
-                    $sql = "INSERT INTO users (username,password,user_telp,email,alamat,isAdmin) VALUES (?,?,?,?,?,0)";
-                    $stmt = $mysqli->prepare($sql);
-                    $stmt->bind_param("sssss", $nName, $nPass, $nTelp, $nEmail, $nAlamat);
-
-                    if ($stmt->execute()) {
-                        // header('Location: home.php');
-                        exit();
-                    }
+        <script>
+            function create() {
+                var x = document.getElementById("createProduct");
+                var y = document.getElementById("updateProduct");
+                var z = document.getElementById("editAdmin");
+                var a = document.getElementById("listItem");
+                if (x.style.display === "none") {
+                    x.style.display = "block";
+                    y.style.display = "none";
+                    z.style.display = "none";
+                    a.style.display = "none";
+                } else {
+                    x.style.display = "none";
                 }
-                ?>
+            }
+
+            function update() {
+                var x = document.getElementById("createProduct");
+                var y = document.getElementById("updateProduct");
+                var z = document.getElementById("editAdmin");
+                var a = document.getElementById("listItem");
+                if (y.style.display === "none") {
+                    y.style.display = "block";
+                    x.style.display = "none";
+                    z.style.display = "none";
+                    a.style.display = "none";
+                } else {
+                    y.style.display = "none";
+                }
+            }
+
+            function editAdmin() {
+                var x = document.getElementById("createProduct");
+                var y = document.getElementById("updateProduct");
+                var z = document.getElementById("editAdmin");
+                var a = document.getElementById("listItem");
+                if (z.style.display === "none") {
+                    z.style.display = "block";
+                    y.style.display = "none";
+                    x.style.display = "none";
+                    a.style.display = "none";
+                } else {
+                    z.style.display = "none";
+                }
+            }
+
+            function listItem() {
+                var x = document.getElementById("createProduct");
+                var y = document.getElementById("updateProduct");
+                var z = document.getElementById("editAdmin");
+                var a = document.getElementById("listItem");
+                if (a.style.display === "none") {
+                    a.style.display = "block";
+                    y.style.display = "none";
+                    x.style.display = "none";
+                    z.style.display = "none";
+                } else {
+                    a.style.display = "none";
+                }
+            }
+        </script>
+
+        <section id="createProduct" style="display: none;">
+            <!-- pop up create product -->
+            <div class="modal fade bd-example-modal-lg" id="createproductmodal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="myLargeModalLabel">Daftar</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal2" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <!-- Form for creating a new account -->
+                            <form method="post">
+                                <div class="form-group mb-3">
+                                    <label for="newImage">Gambar</label>
+                                    <input type="text" class="form-control" id="newImage" name="newImage" placeholder="Enter ImageAddress" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="newBarang">Nama barang</label>
+                                    <input type="text" class="form-control" id="newBarang" name="newBarang" placeholder="Enter Nama Barang" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="newHarga">Harga Satuan</label>
+                                    <input type="text" class="form-control" id="newHarga" name="newHarga" placeholder="Enter Harga Satuan" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="newDeskripsi">Deskripsi</label>
+                                    <textarea class="form-control" id="newDeskripsi" name="newDeskripsi" rows="3" placeholder="Enter Deskripsi" required></textarea>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="newStock">Stock</label>
+                                    <input type="text" class="form-control" id="newStock" name="newStock" placeholder="Enter Stock" required>
+                                </div>
+                                <button type="submit" class="btn btn-warning">Add Product</button>
+                            </form>
+                        </div>
+
+                        <?php
+                        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['newUsername']) && isset($_POST['newPassword']) && isset($_POST['newTelpon']) && isset($_POST['newEmail']) && isset($_POST['newAlamat'])) {
+                            $nName = $_POST['newUsername'];
+                            $nPass = $_POST['newPassword'];
+                            $nTelp = $_POST['newTelpon'];
+                            $nEmail = $_POST['newEmail'];
+                            $nAlamat = $_POST['newAlamat'];
+
+                            $sql = "INSERT INTO users (username,password,user_telp,email,alamat,isAdmin) VALUES (?,?,?,?,?,0)";
+                            $stmt = $mysqli->prepare($sql);
+                            $stmt->bind_param("sssss", $nName, $nPass, $nTelp, $nEmail, $nAlamat);
+
+                            if ($stmt->execute()) {
+                                // header('Location: home.php');
+                                exit();
+                            }
+                        }
+                        ?>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
+        </section>
+        <section id="updateProduct" style="display: none;">
+            <form method="post">
+                <div class="form-group mb-3">
+                    <label for="newImage">ini update Gambar</label>
+                    <input type="text" class="form-control" id="newImage" name="newImage" placeholder="Enter ImageAddress" required>
+                </div>
+                <div class="form-group mb-3">
+                    <label for="newBarang">Nama barang</label>
+                    <input type="text" class="form-control" id="newBarang" name="newBarang" placeholder="Enter Nama Barang" required>
+                </div>
+                <div class="form-group mb-3">
+                    <label for="newHarga">Harga Satuan</label>
+                    <input type="text" class="form-control" id="newHarga" name="newHarga" placeholder="Enter Harga Satuan" required>
+                </div>
+                <div class="form-group mb-3">
+                    <label for="newDeskripsi">Deskripsi</label>
+                    <textarea class="form-control" id="newDeskripsi" name="newDeskripsi" rows="3" placeholder="Enter Deskripsi" required></textarea>
+                </div>
+                <div class="form-group mb-3">
+                    <label for="newStock">Stock</label>
+                    <input type="text" class="form-control" id="newStock" name="newStock" placeholder="Enter Stock" required>
+                </div>
+                <button type="submit" class="btn btn-warning">Add Product</button>
+            </form>
+        </section>
 
-    <section class="container mx-auto my-10">
-        <?php
-        echo '<table class="table-auto w-full border-collapse border border-gray-300">';
-        echo '<thead>';
-        echo '<tr class="bg-gray-200">';
-        echo '<th class="border border-gray-300 px-4 py-2 text-left">Username</th>';
-        echo '<th class="border border-gray-300 px-4 py-2 text-left">Password</th>';
-        echo '<th class="border border-gray-300 px-4 py-2 text-left">Telp</th>';
-        echo '<th class="border border-gray-300 px-4 py-2 text-left">Email</th>';
-        echo '<th class="border border-gray-300 px-4 py-2 text-left">Alamat</th>';
-        echo '<th class="border border-gray-300 px-4 py-2 text-left">isAdmin</th>';
-        echo '</tr>';
-        echo '</thead>';
-        echo '<tbody>';
-
-        $stmt = $mysqli->query("SELECT user_id, username, password, user_telp, email, alamat, isAdmin FROM users");
-        while ($row = $stmt->fetch_assoc()) {
-            echo '<tr class="hover:bg-gray-100">';
-            echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['username']) . '</td>';
-            echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['password']) . '</td>';
-            echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['user_telp']) . '</td>';
-            echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['email']) . '</td>';
-            echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['alamat']) . '</td>';
-            echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['isAdmin']) . '</td>';
+        <section id="editAdmin" style="display: none;" class="container mx-auto my-10">
+            <?php
+            echo '<table class="table-auto w-full border-collapse border border-gray-300">';
+            echo '<thead>';
+            echo '<tr class="bg-gray-200">';
+            echo '<th class="border border-gray-300 px-4 py-2 text-left">Username</th>';
+            echo '<th class="border border-gray-300 px-4 py-2 text-left">Password</th>';
+            echo '<th class="border border-gray-300 px-4 py-2 text-left">Telp</th>';
+            echo '<th class="border border-gray-300 px-4 py-2 text-left">Email</th>';
+            echo '<th class="border border-gray-300 px-4 py-2 text-left">Alamat</th>';
+            echo '<th class="border border-gray-300 px-4 py-2 text-left">isAdmin</th>';
             echo '</tr>';
-        }
-        echo '</tbody>';
-        echo '</table>';
-        ?>
-    </section>
+            echo '</thead>';
+            echo '<tbody>';
 
-    <br><br><br><br><br><br><br><br><br><br>
+            $stmt = $mysqli->query("SELECT user_id, username, password, user_telp, email, alamat, isAdmin FROM users");
+            while ($row = $stmt->fetch_assoc()) {
+                echo '<tr class="hover:bg-gray-100">';
+                echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['username']) . '</td>';
+                echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['password']) . '</td>';
+                echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['user_telp']) . '</td>';
+                echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['email']) . '</td>';
+                echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['alamat']) . '</td>';
+                echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['isAdmin']) . '</td>';
+                echo '</tr>';
+            }
+            echo '</tbody>';
+            echo '</table>';
+            ?>
+        </section>
+
+        <section id="listItem" style="display: none;">
+            <div class=" m-3 grid grid-cols-4 gap-3">
+                <a href="" data-bs-toggle="modal" data-bs-target="#itemModal">
+                    <div class="card shadow-md hover:shadow-2xl">
+                        <img class="card-img-top" src="https://jasindo.co.id/uploads/media/lvqceq27yqgfrux4qxahhdqor-beraspng" alt="Card image cap">
+                        <div class="card-body p-4 rounded-md bg-white">
+                            <h5 class="card-title text-lg font-semibold text-gray-800">Nama Product</h5>
+                            <p class="card-text font-bold text-lg text-green-600">Rp. 0</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <br><br><br><br><br><br><br><br><br><br>
 </body>
 
 </html>

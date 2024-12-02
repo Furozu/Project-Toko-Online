@@ -38,7 +38,7 @@ session_start();
             $("#searchBar").focus();
             var currentValue = $("#searchBar").val();
             $("#searchBar").val("");
-            $("#searchBar").val(currentValue); 
+            $("#searchBar").val(currentValue);
 
             // Quantity Minus
             $(document).on('click', '.minus-btn', function() {
@@ -88,7 +88,7 @@ session_start();
             // Auto Submit Search Bar
             $('#searchBar').on('input', function() {
                 $(this).closest('form').submit();
-                
+
             });
 
 

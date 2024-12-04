@@ -40,8 +40,8 @@ session_start();
                 <li class="nav-item">
                     <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="adminPage.php">Admin</a>
                 </li>
-                <li class="nav-item"><!-- TODO: belum connect -->
-                    <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="">Admin History</a>
+                <li class="nav-item">
+                    <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="adminHistory.php">Admin History</a>
                 </li>
             </ul>
         </div>

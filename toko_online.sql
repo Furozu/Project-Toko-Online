@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 19 Nov 2024 pada 08.34
+-- Waktu pembuatan: 06 Des 2024 pada 14.28
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -32,8 +32,16 @@ CREATE TABLE `checkout` (
   `date` date NOT NULL,
   `total_harga` int(10) NOT NULL,
   `user_id` int(10) NOT NULL,
-  `payment_id` int(10) NOT NULL
+  `payment_id` int(10) NOT NULL,
+  `status` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `checkout`
+--
+
+INSERT INTO `checkout` (`checkout_id`, `date`, `total_harga`, `user_id`, `payment_id`, `status`) VALUES
+(1, '0000-00-00', 195000, 2, 1, 'Pending');
 
 -- --------------------------------------------------------
 
@@ -47,6 +55,14 @@ CREATE TABLE `detailcheckout` (
   `checkout_id` int(10) NOT NULL,
   `jumlah_product` int(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `detailcheckout`
+--
+
+INSERT INTO `detailcheckout` (`detail_id`, `product_id`, `checkout_id`, `jumlah_product`) VALUES
+(1, 1, 1, 2),
+(2, 2, 1, 2);
 
 -- --------------------------------------------------------
 
@@ -113,7 +129,7 @@ INSERT INTO `products` (`product_id`, `gambar`, `nama_product`, `harga_satuan`, 
 (2, 'https://dk4fkkwa4o9l0.cloudfront.net/production/uploads/article/image/1061/Tanpa_judul__1920_x_1080_px___1920_x_1080_px___1080_x_1920_px___1920_x_1080_px___8_.jpg', 'Minyak Goreng 1L', 25000, 'Minyak goreng premium yang melewati proses pemurnian', 80, 1),
 (3, 'https://cdn1-production-images-kly.akamaized.net/6owxF4qupsKGTdeWri1-hD-UURc=/1200x675/smart/filters:quality(75):strip_icc():format(jpeg)/kly-media-production/medias/1295184/original/070904600_1469165488-sabun_cuci_piring_2_copy.jpg', 'Sabun Cuci Piring 650ml', 18800, 'Sabun cuci piring / pembersih alat dapur', 40, 2),
 (4, 'https://asset.kompas.com/crops/afdljRaqodyDXZ7tHTQCTwmuMvc=/0x0:1000x667/1200x800/data/photo/2024/02/22/65d6e36c6faa2.jpg', 'Wajan', 250000, 'Wajan anti lengket high quality', 10, 3),
-(5, 'https://tokokadounik.com/assets/images/produk/spatula_stainless_steel_set_6_in_1_sodet_sutil_alat_masak_dapur_stainless_ec803a228b.jpg', 'Spatula Set 6 In 1', 180000, 'Spatula stainless steel set 6 in 1 peralatan dapur stainless', 15, 3);
+(5, 'https://tokokadounik.com/assets/images/produk/spatula_stainless_steel_set_6_in_1_sodet_sutil_alat_masak_dapur_stainless_ec803a228b.jpg', 'Spatula Set 6 in 1', 180000, 'Spatula stainless steel set 6 in 1 peralatan dapur stainless', 15, 3);
 
 -- --------------------------------------------------------
 
@@ -194,13 +210,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT untuk tabel `checkout`
 --
 ALTER TABLE `checkout`
-  MODIFY `checkout_id` int(10) NOT NULL AUTO_INCREMENT;
+  MODIFY `checkout_id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT untuk tabel `detailcheckout`
 --
 ALTER TABLE `detailcheckout`
-  MODIFY `detail_id` int(10) NOT NULL AUTO_INCREMENT;
+  MODIFY `detail_id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT untuk tabel `kategori`
@@ -224,7 +240,7 @@ ALTER TABLE `products`
 -- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `user_id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)

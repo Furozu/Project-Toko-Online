@@ -34,14 +34,14 @@ session_start();
                 <li class="nav-item"><!-- TODO: belum connect -->
                     <a class="nav-link text-yellow-400 hover:text-white hover:font-semibold" href="">Profile</a>
                 </li>
-                <li class="nav-item"><!-- TODO: belum connect -->
-                    <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="history.php">History</a>
+                <li class="nav-item">
+                    <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="userHistory.php">History</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="adminPage.php">Admin</a>
                 </li>
-                <li class="nav-item"><!-- TODO: belum connect -->
-                    <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="">Admin History</a>
+                <li class="nav-item">
+                    <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="adminHistory.php">Admin History</a>
                 </li>
             </ul>
         </div>
@@ -231,6 +231,8 @@ session_start();
             echo '<th class="border border-gray-300 px-4 py-2 text-left">Email</th>';
             echo '<th class="border border-gray-300 px-4 py-2 text-left">Alamat</th>';
             echo '<th class="border border-gray-300 px-4 py-2 text-left">isAdmin</th>';
+            echo '<th class="border border-gray-300 px-4 py-2 text-center">edit</th>';
+            echo '<th class="border border-gray-300 px-4 py-2 text-center">delete</th>';
             echo '</tr>';
             echo '</thead>';
             echo '<tbody>';
@@ -244,7 +246,12 @@ session_start();
                 echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['email']) . '</td>';
                 echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['alamat']) . '</td>';
                 echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['isAdmin']) . '</td>';
-                echo '</tr>';
+                echo '<td class="border border-gray-300 px-4 py-2 text-center">
+                <button class="btn btn-warning" onclick="">Edit</button>
+                </td>';
+                echo '<td class="border border-gray-300 px-4 py-2 text-center">
+                <button class="btn btn-danger" onclick="">Delete</button>
+                </td>';
             }
             echo '</tbody>';
             echo '</table>';
@@ -253,16 +260,35 @@ session_start();
 
         <section id="listItem" style="display: none;">
             <div class=" m-3 grid grid-cols-4 gap-3">
-                <a href="" data-bs-toggle="modal" data-bs-target="#itemModal">
-                    <div class="card shadow-md hover:shadow-2xl">
-                        <img class="card-img-top" src="https://jasindo.co.id/uploads/media/lvqceq27yqgfrux4qxahhdqor-beraspng" alt="Card image cap">
-                        <div class="card-body p-4 rounded-md bg-white">
-                            <h5 class="card-title text-lg font-semibold text-gray-800">Nama Product</h5>
-                            <p class="card-text font-bold text-lg text-green-600">Rp. 0</p>
+
+                <?php
+                $stmt = $mysqli->query("SELECT product_id, gambar, nama_product, harga_satuan, deskripsi, stock_product FROM products ");
+                while ($row = $stmt->fetch_assoc()) {
+
+                    // product element
+                    $product = [
+                        'id' => htmlentities($row['product_id']),
+                        'image' => htmlentities($row['gambar']),
+                        'name' => htmlentities($row['nama_product']),
+                        'price' => htmlentities($row['harga_satuan']),
+                        'description' => htmlentities($row['deskripsi']),
+                        'stock' => htmlentities($row['stock_product'])
+                    ];
+                ?>
+                    <a href="" data-bs-toggle="modal" data-bs-target="#<?= $modalId; ?>">
+                        <div class="card shadow-md hover:shadow-2xl">
+                            <img class="card-img-top min-h-48" src="<?= $product['image']; ?>" alt="Card image cap"
+                                style="height: 48px; object-fit: cover; object-position: center;">
+                            <div class="card-body p-4 rounded-md bg-white">
+                                <h5 class="card-title text-lg font-semibold text-gray-800"><?= $product['name']; ?></h5>
+                                <p class="card-text font-bold text-lg text-green-600">Rp. <?= number_format($product['price'], 0, ',', '.'); ?></p>
+                            </div>
                         </div>
-                    </div>
-                </a>
-            </div>
+                    </a>
+
+                <?php
+                }
+                ?>
         </section>
 
         <br><br><br><br><br><br><br><br><br><br>

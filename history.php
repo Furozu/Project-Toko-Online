@@ -46,4 +46,13 @@ session_start();
             </ul>
         </div>
     </nav>
+
+    <section class="container py-5 px-20">
+        <div class="border border-warning">
+            <p class="d-inline">product1</p>
+            <p class="d-inline">harga1</p>
+        </div>
+
+    </section>
+
 </body>

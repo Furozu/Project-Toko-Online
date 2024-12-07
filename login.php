@@ -54,6 +54,10 @@ session_start();
                             if ($row['isAdmin'] == '1') {
                                 $isAdmin = 1;
                             }
+
+                            // supaya bisa mengecek user id di page lain
+                            $_SESSION['user_id'] = $row['user_id'];
+
                             break;
                         }
                     }
@@ -61,6 +65,7 @@ session_start();
                     if ($login == 0) {
                         echo '<div class="alert alert-danger">Login Failed</div>';
                     } else if ($isAdmin == 1) {
+                        
                         echo '<div class="alert alert-success">Welcome Admin</div>';
                         header('Location: adminPage.php');
                     } else if ($login == 1) {
@@ -151,6 +156,7 @@ session_start();
         </div>
     </section>
 
+    <!-- Tabel Users -->
     <section class="container mx-auto my-10">
         <h1>Tabel Users utk Testing</h1>
         <?php

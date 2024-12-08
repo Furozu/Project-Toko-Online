@@ -26,17 +26,6 @@ session_start();
     <!-- Inisialisasi JQuary -->
     <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
 
-
-    <!-- untuk JavaScript di dalam file html -->
-    <script>
-        // jQuery starter function
-        $(document).ready(function() {
-            // "." = isi class
-            // "#" = isi id
-
-        });
-    </script>
-
 </head>
 
 <body>
@@ -83,9 +72,9 @@ session_start();
 
                         <?php
                         $stmt = $mysqli->query("SELECT c.checkout_id, c.date, c.user_id, u.username, c.total_harga, p.payment_method, c.status
-                                                FROM checkout c
-                                                JOIN users u ON c.user_id = u.user_id
-                                                JOIN payment p ON c.payment_id = p.payment_id;");
+                        FROM checkout c
+                        JOIN users u ON c.user_id = u.user_id
+                        JOIN payment p ON c.payment_id = p.payment_id;");
                         while ($row = $stmt->fetch_assoc()) {
 
                             // checkout data
@@ -99,23 +88,29 @@ session_start();
                                 'status' => htmlentities($row['status'])
                             ];
                         ?>
-
+                            <!-- display attribut checkout -->
                             <tr class="bg-gray-50 hover:bg-gradient-to-r from-gray-50 to-gray-200 transition-colors duration-300">
                                 <td class="px-4 py-3"><?= $checkout['id']; ?></td>
-                                <td class="px-4 py-3">2024-12-01</td>
+                                <td class="px-4 py-3"><?= $checkout['date']; ?></td>
                                 <td class="px-4 py-3"><?= $checkout['user_id']; ?></td>
                                 <td class="px-4 py-3 font-semibold text-blue-600"><?= $checkout['username']; ?></td>
                                 <td class="px-4 py-3">
                                     <ul class="list-disc pl-5 text-left">
 
                                         <?php
-                                        $stmt = $mysqli->query("SELECT d.detail_id, p.nama_product, d.jumlah_product, p.harga_satuan
-                                        FROM detailcheckout d
-                                        JOIN products p ON d.product_id = p.product_id;");
+                                        // item-item yang ada di dalam checkout
+                                        $stmt_detail = $mysqli->prepare("SELECT d.detail_id, p.nama_product, d.jumlah_product, p.harga_satuan
+                                                 FROM detailcheckout d
+                                                 JOIN products p ON d.product_id = p.product_id
+                                                 WHERE d.checkout_id = ?");
+                                        $stmt_detail->bind_param("i", $checkout['id']);
+                                        $stmt_detail->execute();
+                                        $result_detail = $stmt_detail->get_result();
 
-                                        while ($row = $stmt->fetch_assoc()) {
-                                            $totalSatuan = $row['jumlah_product'] * $row['harga_satuan'];
-                                            echo '<li>' . $row['nama_product'] . ' (' . $row['jumlah_product'] . ' x Rp. ' . number_format($row['harga_satuan'], 0, ',', '.') . ') = Rp. ' . number_format($totalSatuan, 0, ',', '.') . '</li>';
+                                        // display item nya
+                                        while ($row_detail = $result_detail->fetch_assoc()) {
+                                            $totalSatuan = $row_detail['jumlah_product'] * $row_detail['harga_satuan'];
+                                            echo '<li>' . $row_detail['nama_product'] . ' (' . $row_detail['jumlah_product'] . ' x Rp. ' . number_format($row_detail['harga_satuan'], 0, ',', '.') . ') = Rp. ' . number_format($totalSatuan, 0, ',', '.') . '</li>';
                                         }
                                         ?>
 
@@ -132,7 +127,8 @@ session_start();
                         }
                         ?>
 
-                        <!-- TEST -->
+
+                        <!-- Simpanan sementera untuk status Completed -->
                         <tr class="bg-gray-50">
                             <td class="px-4 py-3">ID</td>
                             <td class="px-4 py-3">Date</td>

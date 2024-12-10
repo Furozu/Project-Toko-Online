@@ -31,8 +31,8 @@ session_start();
         <a class="navbar-brand pl-12 text-yellow-400 hover:text-white hover:font-semibold" href="home.php">Toko Online</a>
         <div class="navbar justify-content-between">
             <ul class="navbar-nav mr-auto gap-3">
-                <li class="nav-item"><!-- TODO: belum connect -->
-                    <a class="nav-link text-yellow-400 hover:text-white hover:font-semibold" href="">Profile</a>
+                <li class="nav-item">
+                    <a class="nav-link text-yellow-400 hover:text-white hover:font-semibold" href="profil.php">Profile</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="userHistory.php">History</a>
@@ -49,93 +49,44 @@ session_start();
 
     <!-- buttons -->
     <section class="container-full">
-        <br><br>
-        <div class="row justify-items-between">
+        <div class="grid gap-8 grid-cols-3 px-3 pt-4 justify-items-between">
 
-            <div class="col-lg-3 justify-items-center p-8">
-                <a class="text-center" href="#" data-bs-toggle="modal" data-bs-target="#createproductmodal">
-                    <p class="h4 p-10 bg-warning rounded fw-bold hover:text-white" onclick="create()"> CREATE NEW PRODUCT</p>
-                </a>
-            </div>
-            <div class="col-lg-3 justify-items-center p-8">
-                <a class="text-center" href="#">
-                    <p class="h4 p-10 bg-warning rounded fw-bold hover:text-white" onclick="update()"> UPDATE PRODUCT</p>
-                </a>
-            </div>
-            <div class="col-lg-3 justify-items-center p-8">
-                <a class="text-center" href="#">
-                    <p class="h4 p-10 bg-warning rounded fw-bold hover:text-white" onclick="editAdmin()"> SHOW USERS</p>
-                </a>
-            </div>
-            <div class="col-lg-3 justify-items-center p-8">
-                <a class="text-center" href="#">
-                    <p class="h4 p-10 bg-warning rounded fw-bold hover:text-white" onclick="listItem()"> SHOW PRODUCTS</p>
-                </a>
-            </div>
+            <a class="text-center" href="#" data-bs-toggle="modal" data-bs-target="#createproductmodal">
+                <p class="h4 p-10 bg-warning rounded fw-bold hover:text-white" onclick="create()"> CREATE NEW PRODUCT</p>
+            </a>
+
+            <a class="text-center" href="#">
+                <p class="h4 p-10 bg-warning rounded fw-bold hover:text-white" onclick="editAdmin()"> SHOW USERS</p>
+            </a>
+
+            <a class="text-center" href="#">
+                <p class="h4 p-10 bg-warning rounded fw-bold hover:text-white" onclick="listItem()"> SHOW PRODUCTS</p>
+            </a>
+
         </div>
         <script>
-            function create() {
-                var x = document.getElementById("createProduct");
-                var y = document.getElementById("updateProduct");
-                var z = document.getElementById("editAdmin");
-                var a = document.getElementById("listItem");
-                if (x.style.display === "none") {
-                    x.style.display = "block";
-                    y.style.display = "none";
-                    z.style.display = "none";
-                    a.style.display = "none";
-                } else {
-                    x.style.display = "none";
-                }
-            }
-
-            function update() {
-                var x = document.getElementById("createProduct");
-                var y = document.getElementById("updateProduct");
-                var z = document.getElementById("editAdmin");
-                var a = document.getElementById("listItem");
-                if (y.style.display === "none") {
-                    y.style.display = "block";
-                    x.style.display = "none";
-                    z.style.display = "none";
-                    a.style.display = "none";
-                } else {
-                    y.style.display = "none";
-                }
-            }
-
             function editAdmin() {
-                var x = document.getElementById("createProduct");
-                var y = document.getElementById("updateProduct");
                 var z = document.getElementById("editAdmin");
                 var a = document.getElementById("listItem");
                 if (z.style.display === "none") {
                     z.style.display = "block";
-                    y.style.display = "none";
-                    x.style.display = "none";
-                    a.style.display = "none";
                 } else {
                     z.style.display = "none";
                 }
             }
 
             function listItem() {
-                var x = document.getElementById("createProduct");
-                var y = document.getElementById("updateProduct");
                 var z = document.getElementById("editAdmin");
                 var a = document.getElementById("listItem");
                 if (a.style.display === "none") {
                     a.style.display = "block";
-                    y.style.display = "none";
-                    x.style.display = "none";
-                    z.style.display = "none";
                 } else {
                     a.style.display = "none";
                 }
             }
         </script>
 
-        <section id="createProduct" style="display: none;">
+        <section id="createProduct">
             <!-- pop up create product -->
             <div class="modal fade bd-example-modal-lg" id="createproductmodal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
@@ -194,33 +145,8 @@ session_start();
                 </div>
             </div>
         </section>
-        <section id="updateProduct" style="display: none;">
-            <form method="post">
-                <div class="form-group mb-3">
-                    <label for="newImage">ini update Gambar</label>
-                    <input type="text" class="form-control" id="newImage" name="newImage" placeholder="Enter ImageAddress" required>
-                </div>
-                <div class="form-group mb-3">
-                    <label for="newBarang">Nama barang</label>
-                    <input type="text" class="form-control" id="newBarang" name="newBarang" placeholder="Enter Nama Barang" required>
-                </div>
-                <div class="form-group mb-3">
-                    <label for="newHarga">Harga Satuan</label>
-                    <input type="text" class="form-control" id="newHarga" name="newHarga" placeholder="Enter Harga Satuan" required>
-                </div>
-                <div class="form-group mb-3">
-                    <label for="newDeskripsi">Deskripsi</label>
-                    <textarea class="form-control" id="newDeskripsi" name="newDeskripsi" rows="3" placeholder="Enter Deskripsi" required></textarea>
-                </div>
-                <div class="form-group mb-3">
-                    <label for="newStock">Stock</label>
-                    <input type="text" class="form-control" id="newStock" name="newStock" placeholder="Enter Stock" required>
-                </div>
-                <button type="submit" class="btn btn-warning">Add Product</button>
-            </form>
-        </section>
 
-        <section id="editAdmin" style="display: none;" class="container mx-auto my-10">
+        <section id="editAdmin" style="display: none;" class="my-8 mx-3">
             <?php
             echo '<table class="table-auto w-full border-collapse border border-gray-300">';
             echo '<thead>';
@@ -231,8 +157,8 @@ session_start();
             echo '<th class="border border-gray-300 px-4 py-2 text-left">Email</th>';
             echo '<th class="border border-gray-300 px-4 py-2 text-left">Alamat</th>';
             echo '<th class="border border-gray-300 px-4 py-2 text-left">isAdmin</th>';
-            echo '<th class="border border-gray-300 px-4 py-2 text-center">edit</th>';
-            echo '<th class="border border-gray-300 px-4 py-2 text-center">delete</th>';
+            echo '<th class="border border-gray-300 px-4 py-2 text-center"></th>';
+            echo '<th class="border border-gray-300 px-4 py-2 text-center"></th>';
             echo '</tr>';
             echo '</thead>';
             echo '<tbody>';
@@ -246,10 +172,10 @@ session_start();
                 echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['email']) . '</td>';
                 echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['alamat']) . '</td>';
                 echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['isAdmin']) . '</td>';
-                echo '<td class="border border-gray-300 px-4 py-2 text-center">
+                echo '<td class="border border-gray-300 py-2 text-center">
                 <button class="btn btn-warning" onclick="">Edit</button>
                 </td>';
-                echo '<td class="border border-gray-300 px-4 py-2 text-center">
+                echo '<td class="border border-gray-300 py-2 text-center">
                 <button class="btn btn-danger" onclick="">Delete</button>
                 </td>';
             }
@@ -259,7 +185,7 @@ session_start();
         </section>
 
         <section id="listItem" style="display: none;">
-            <div class=" m-3 grid grid-cols-4 gap-3">
+            <div class=" mx-3 grid grid-cols-4 gap-3 my-10">
 
                 <?php
                 $stmt = $mysqli->query("SELECT product_id, gambar, nama_product, harga_satuan, deskripsi, stock_product FROM products ");
@@ -274,21 +200,54 @@ session_start();
                         'description' => htmlentities($row['deskripsi']),
                         'stock' => htmlentities($row['stock_product'])
                     ];
+
+
+                    $modalId = "itemModal" . $product['id'];
                 ?>
-                    <a href="" data-bs-toggle="modal" data-bs-target="#<?= $modalId; ?>">
-                        <div class="card shadow-md hover:shadow-2xl">
-                            <img class="card-img-top min-h-48" src="<?= $product['image']; ?>" alt="Card image cap"
-                                style="height: 48px; object-fit: cover; object-position: center;">
-                            <div class="card-body p-4 rounded-md bg-white">
-                                <h5 class="card-title text-lg font-semibold text-gray-800"><?= $product['name']; ?></h5>
-                                <p class="card-text font-bold text-lg text-green-600">Rp. <?= number_format($product['price'], 0, ',', '.'); ?></p>
+                    <div class="card shadow-md hover:shadow-2xl">
+                        <img class="card-img-top min-h-48" src="<?= $product['image']; ?>" alt="Card image cap"
+                            style="height: 48px; object-fit: cover; object-position: center;">
+                        <div class="card-body p-4 rounded-md bg-white">
+                            <h5 class="card-title text-lg font-semibold text-gray-800"><?= $product['name']; ?></h5>
+                            <p class="card-text font-bold text-lg text-green-600">Rp. <?= number_format($product['price'], 0, ',', '.'); ?></p>
+                        </div>
+                        <button class="btn btn-warning mb-4 ml-auto mr-8 hover:text-white" data-bs-toggle="modal" data-bs-target="#<?= $modalId; ?>">Edit</button>
+                    </div>
+
+                    <div class="modal fade" id="<?= $modalId; ?>" tabindex="-1" role="dialog" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                            <div class="modal-content rounded-md shadow-lg">
+                                <div class="modal-header border-b">
+                                    <h5 class="modal-title text-xl font-bold text-gray-800">Product Details</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
+                                    <!-- Image Section -->
+                                    <div class="flex justify-center">
+                                        <img class="rounded-lg shadow-md size-fit" src="<?= $product['image']; ?>" alt="Product image">
+                                    </div>
+                                    <!-- Details Section -->
+                                    <div class="space-y-3">
+                                        <p class="text-lg font-semibold text-gray-800"><?= $product['name']; ?></p>
+                                        <p class="text-lg text-green-500 font-bold">Rp. <?= number_format($product['price'], 0, ',', '.'); ?></p>
+                                        <p class="py-2 text-sm text-black text-justify"><?= $product['description']; ?></p>
+                                        <p class="text-sm text-black font-medium">Stock: <?= $product['stock']; ?></p>
+                                    </div>
+                                </div>
+                                <form>
+                                    <div class="modal-footer border-t flex justify-between items-center px-4 py-3">
+                                        <!-- Add to Cart Button -->
+                                        <button type="submit" class="btn btn-primary px-5 py-2 rounded-lg text-sm">Add To Cart</button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
-                    </a>
+                    </div>
 
                 <?php
                 }
                 ?>
+            </div>
         </section>
 
         <br><br><br><br><br><br><br><br><br><br><br>

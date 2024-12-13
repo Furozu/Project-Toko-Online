@@ -185,66 +185,101 @@ session_start();
         </section>
 
         <section id="listItem" style="display: none;">
-            <div class=" mx-3 grid grid-cols-4 gap-3 my-10">
-
+            <div class="mx-3 grid grid-cols-4 gap-3 my-10">
                 <?php
-                $stmt = $mysqli->query("SELECT product_id, gambar, nama_product, harga_satuan, deskripsi, stock_product FROM products ");
-                while ($row = $stmt->fetch_assoc()) {
+                // Fetch all products for the list
+                $stmt = $mysqli->query("SELECT product_id, gambar, nama_product, harga_satuan, deskripsi, stock_product FROM products");
 
-                    // product element
-                    $product = [
-                        'id' => htmlentities($row['product_id']),
-                        'image' => htmlentities($row['gambar']),
-                        'name' => htmlentities($row['nama_product']),
-                        'price' => htmlentities($row['harga_satuan']),
-                        'description' => htmlentities($row['deskripsi']),
-                        'stock' => htmlentities($row['stock_product'])
-                    ];
+                // Check if the query was successful
+                if ($stmt === false) {
+                    echo "Error in query: " . $mysqli->error;
+                } else {
+                    // Check if there are any products in the result
+                    if ($stmt->num_rows > 0) {
+                        while ($row = $stmt->fetch_assoc()) {
+                            // Prepare product data
+                            $product = [
+                                'id' => htmlentities($row['product_id']),
+                                'image' => htmlentities($row['gambar']),
+                                'name' => htmlentities($row['nama_product']),
+                                'price' => htmlentities($row['harga_satuan']),
+                                'description' => htmlentities($row['deskripsi']),
+                                'stock' => htmlentities($row['stock_product'])
+                            ];
 
-
-                    $modalId = "itemModal" . $product['id'];
+                            // Modal ID
+                            $modalId = "itemModal" . $product['id'];
                 ?>
-                    <div class="card shadow-md hover:shadow-2xl">
-                        <img class="card-img-top min-h-48" src="<?= $product['image']; ?>" alt="Card image cap"
-                            style="height: 48px; object-fit: cover; object-position: center;">
-                        <div class="card-body p-4 rounded-md bg-white">
-                            <h5 class="card-title text-lg font-semibold text-gray-800"><?= $product['name']; ?></h5>
-                            <p class="card-text font-bold text-lg text-green-600">Rp. <?= number_format($product['price'], 0, ',', '.'); ?></p>
-                        </div>
-                        <button class="btn btn-warning mb-4 ml-auto mr-8 hover:text-white" data-bs-toggle="modal" data-bs-target="#<?= $modalId; ?>">Edit</button>
-                    </div>
 
-                    <div class="modal fade" id="<?= $modalId; ?>" tabindex="-1" role="dialog" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                            <div class="modal-content rounded-md shadow-lg">
-                                <div class="modal-header border-b">
-                                    <h5 class="modal-title text-xl font-bold text-gray-800">Product Details</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <!-- Product Card -->
+                            <div class="card shadow-md hover:shadow-2xl">
+                                <img class="card-img-top min-h-48" src="<?= $product['image']; ?>" alt="Card image cap" style="height: 48px; object-fit: cover; object-position: center;">
+                                <div class="card-body p-4 rounded-md bg-white">
+                                    <h5 class="card-title text-lg font-semibold text-gray-800"><?= $product['name']; ?></h5>
+                                    <p class="card-text font-bold text-lg text-green-600">Rp. <?= number_format($product['price'], 0, ',', '.'); ?></p>
                                 </div>
-                                <div class="modal-body grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
-                                    <!-- Image Section -->
-                                    <div class="flex justify-center">
-                                        <img class="rounded-lg shadow-md size-fit" src="<?= $product['image']; ?>" alt="Product image">
-                                    </div>
-                                    <!-- Details Section -->
-                                    <div class="space-y-3">
-                                        <p class="text-lg font-semibold text-gray-800"><?= $product['name']; ?></p>
-                                        <p class="text-lg text-green-500 font-bold">Rp. <?= number_format($product['price'], 0, ',', '.'); ?></p>
-                                        <p class="py-2 text-sm text-black text-justify"><?= $product['description']; ?></p>
-                                        <p class="text-sm text-black font-medium">Stock: <?= $product['stock']; ?></p>
-                                    </div>
-                                </div>
-                                <form>
-                                    <div class="modal-footer border-t flex justify-between items-center px-4 py-3">
-                                        <!-- Add to Cart Button -->
-                                        <button type="submit" class="btn btn-primary px-5 py-2 rounded-lg text-sm">Add To Cart</button>
-                                    </div>
-                                </form>
+                                <button class="btn btn-warning mb-4 ml-auto mr-8 hover:text-white" data-bs-toggle="modal" data-bs-target="#<?= $modalId; ?>">Edit</button>
                             </div>
-                        </div>
-                    </div>
+
+                            <!-- Product Modal -->
+                            <div class="modal fade" id="<?= $modalId; ?>" tabindex="-1" role="dialog" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                    <div class="modal-content rounded-md shadow-lg">
+                                        <div class="modal-header border-b">
+                                            <h5 class="modal-title text-xl font-bold text-gray-800">Product Details</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
+                                            <!-- Image Section -->
+                                            <div class="flex justify-center">
+                                                <img class="rounded-lg shadow-md size-fit" src="<?= $product['image']; ?>" alt="Product image">
+                                            </div>
+                                            <!-- Details Section -->
+                                            <div class="space-y-3">
+                                                <form action="adminPage.php" method="POST">
+                                                    <input type="hidden" name="product_id" value="<?= $product['id'] ?>"><br>
+                                                    <input type="text" name="gambar" value="<?= $product['image'] ?>"><br>
+                                                    <input type="text" name="nama_product" value="<?= $product['name'] ?>"><br>
+                                                    <input type="text" name="harga_satuan" value="<?= $product['price'] ?>"><br>
+                                                    <input type="text" name="deskripsi" value="<?= $product['description'] ?>"><br>
+                                                    <input type="text" name="stock_product" value="<?= $product['stock'] ?>"><br>
+                                                    <input type="submit" class="btn btn-primary" value="Update Product">
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
                 <?php
+                        }
+                    } else {
+                        // If no products are found
+                        echo "No products available.";
+                    }
+                }
+
+                // Handle form submission
+                if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id'])) {
+                    $id = $_POST['product_id'];
+                    $gambar = $_POST['gambar'];
+                    $nama_product = $_POST['nama_product'];
+                    $harga_satuan = $_POST['harga_satuan'];
+                    $deskripsi = $_POST['deskripsi'];
+                    $stock_product = $_POST['stock_product'];
+
+                    // Prepare the update query
+                    $sql = "UPDATE products SET gambar=?, nama_product=?, harga_satuan=?, deskripsi=?, stock_product=? WHERE product_id=?";
+                    $stmt = $mysqli->prepare($sql);
+                    $stmt->bind_param("ssisii", $gambar, $nama_product, $harga_satuan, $deskripsi, $stock_product, $id);
+
+                    // Execute the query and check for success
+                    if ($stmt->execute()) {
+                        echo "<script>alert('Product updated successfully!');</script>";
+                    } else {
+                        echo "Error: " . $stmt->error;
+                    }
+                    $stmt->close();
                 }
                 ?>
             </div>

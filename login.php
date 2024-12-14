@@ -37,44 +37,6 @@ session_start();
                     <p class="text-5xl font-bold">Log In</p>
                 </div>
 
-                <?php
-                $login = 0;
-                $isAdmin = 0;
-
-                if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_POST['name']) && !empty($_POST['pass'])) {
-
-                    $result = $mysqli->query("SELECT user_id,username,password,isAdmin FROM users");
-                    // Untuk check semua pasangan username dan password
-                    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
-
-                        // check pasangan username dan password
-                        if ($_POST['name'] == $row['username'] && $_POST['pass'] == $row['password']) {
-                            $login = 1;
-
-                            if ($row['isAdmin'] == '1') {
-                                $isAdmin = 1;
-                            }
-
-                            // supaya bisa mengecek user id di page lain
-                            $_SESSION['user_id'] = $row['user_id'];
-
-                            break;
-                        }
-                    }
-
-                    if ($login == 0) {
-                        echo '<div class="alert alert-danger">Login Failed</div>';
-                    } else if ($isAdmin == 1) {
-                        
-                        echo '<div class="alert alert-success">Welcome Admin</div>';
-                        header('Location: adminPage.php');
-                    } else if ($login == 1) {
-                        echo '<div class="alert alert-success">Login Success</div>';
-                        header('Location: home.php');
-                    }
-                }
-                ?>
-
                 <!-- Login Username -->
                 <div class="form-group">
                     <label class="pb-1" for="usernameInput">Username</label>
@@ -92,6 +54,48 @@ session_start();
                         <button type="submit" class="size-full btn btn-primary">LOG IN</button>
                     </div>
             </form>
+
+            <?php
+            // status belum berhasil login
+            $login = 0;
+
+            if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_POST['name']) && !empty($_POST['pass'])) {
+
+                $result = $mysqli->query("SELECT user_id,username,password,isAdmin FROM users");
+                // Untuk check semua pasangan username dan password
+                while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+
+                    // check pasangan username dan password
+                    if ($_POST['name'] == $row['username'] && $_POST['pass'] == $row['password']) {
+                        // status berhasil login
+                        $login = 1;
+
+                        // check apakah user adalah admin
+                        if ($row['isAdmin'] == '1') {
+                            $_SESSION['isAdmin'] = 1;
+                        } else {
+                            $_SESSION['isAdmin'] = 0;
+                        }
+
+                        // supaya bisa mengecek user id di page lain
+                        $_SESSION['user_id'] = $row['user_id'];
+
+                        break;
+                    }
+                }
+
+                if ($login == 0) {
+                    echo '<div class="alert alert-danger">Login Failed</div>';
+                } else if ($isAdmin == 1) {
+
+                    echo '<div class="alert alert-success">Welcome Admin</div>';
+                    header('Location: adminPage.php');
+                } else if ($login == 1) {
+                    echo '<div class="alert alert-success">Login Success</div>';
+                    header('Location: home.php');
+                }
+            }
+            ?>
 
             <!-- Create new account MODAL -->
             <p class="mt-1">Create <a class="link-underline text-blue-600" href="" data-bs-toggle="modal" data-bs-target="#createAccountModal">New Account?</a></p>
@@ -134,20 +138,13 @@ session_start();
 
                         <?php
                         if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['newUsername']) && isset($_POST['newPassword']) && isset($_POST['newTelpon']) && isset($_POST['newEmail']) && isset($_POST['newAlamat'])) {
-                            $nName = $_POST['newUsername'];
-                            $nPass = $_POST['newPassword'];
-                            $nTelp = $_POST['newTelpon'];
-                            $nEmail = $_POST['newEmail'];
-                            $nAlamat = $_POST['newAlamat'];
-
                             $sql = "INSERT INTO users (username,password,user_telp,email,alamat,isAdmin) VALUES (?,?,?,?,?,0)";
                             $stmt = $mysqli->prepare($sql);
-                            $stmt->bind_param("sssss", $nName, $nPass, $nTelp, $nEmail, $nAlamat);
+                            $stmt->bind_param("sssss", $_POST['newUsername'], $_POST['newPassword'], $_POST['newTelpon'], $_POST['newEmail'], $_POST['newAlamat']);
+                            $stmt->execute();
 
-                            if ($stmt->execute()) {
-                                // header('Location: home.php');
-                                exit();
-                            }
+                            // refresh page
+                            echo '<meta http-equiv="refresh" content="0">';
                         }
                         ?>
                     </div>

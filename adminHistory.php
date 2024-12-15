@@ -119,33 +119,21 @@ session_start();
                                 <td class="px-4 py-3 font-semibold text-green-600">Rp. <?= number_format($checkout['total_harga'], 0, ',', '.'); ?></td>
                                 <td class="px-4 py-3"><?= $checkout['payment_type']; ?></td>
                                 <td class="px-4 py-3">
-                                    <span class="px-2 py-1 bg-yellow-300 text-yellow-700 text-xs font-medium rounded-full"><?= $checkout['status']; ?></span>
+
+                                    <!-- Pending / Completed -->
+                                    <?php
+                                    if ($checkout['status'] == "Pending") {
+                                        echo '<span class="px-2 py-1 bg-yellow-300 text-yellow-700 text-xs font-medium rounded-full">' . $checkout['status'] . '</span>';
+                                    } else {
+                                        echo '<span class="px-2 py-1 bg-green-300 text-green-700 text-xs font-medium rounded-full">' . $checkout['status'] . '</span>';
+                                    }
+                                    ?>
                                 </td>
                             </tr>
 
                         <?php
                         }
                         ?>
-
-
-                        <!-- Simpanan sementera untuk status Completed -->
-                        <tr class="bg-gray-50">
-                            <td class="px-4 py-3">ID</td>
-                            <td class="px-4 py-3">Date</td>
-                            <td class="px-4 py-3">UserID</td>
-                            <td class="px-4 py-3 font-semibold text-blue-600">Test</td>
-                            <td class="px-4 py-3">
-                                <ul class="list-disc pl-5 text-left">
-                                    <li>Item C (3 x $8) = $24</li>
-                                    <li>Item D (1 x $25) = $25</li>
-                                </ul>
-                            </td>
-                            <td class="px-4 py-3 font-semibold text-green-600">$49</td>
-                            <td class="px-4 py-3">PaymentType</td>
-                            <td class="px-4 py-3">
-                                <span class="px-2 py-1 bg-green-300 text-green-700 text-xs font-medium rounded-full">Completed</span>
-                            </td>
-                        </tr>
                     </tbody>
                 </table>
             </div>

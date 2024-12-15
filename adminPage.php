@@ -93,7 +93,7 @@ session_start();
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="myLargeModalLabel">Daftar</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal2" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
 
                         <div class="modal-body">
@@ -119,26 +119,28 @@ session_start();
                                     <label for="newStock">Stock</label>
                                     <input type="text" class="form-control" id="newStock" name="newStock" placeholder="Enter Stock" required>
                                 </div>
+                                <div class="form-group mb-3">
+                                    <label for="newKategori">Kategori</label>
+                                    <input type="text" class="form-control" id="newKategori" name="newKategori" placeholder="Enter Kategori" required>
+                                </div>
                                 <button type="submit" class="btn btn-warning">Add Product</button>
                             </form>
                         </div>
 
                         <?php
-                        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['newUsername']) && isset($_POST['newPassword']) && isset($_POST['newTelpon']) && isset($_POST['newEmail']) && isset($_POST['newAlamat'])) {
-                            $nName = $_POST['newUsername'];
-                            $nPass = $_POST['newPassword'];
-                            $nTelp = $_POST['newTelpon'];
-                            $nEmail = $_POST['newEmail'];
-                            $nAlamat = $_POST['newAlamat'];
+                        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['newImage']) && isset($_POST['newBarang']) && isset($_POST['newHarga']) && isset($_POST['newDeskripsi']) && isset($_POST['newStock']) && isset($_POST['newKategori'])) {
+                            $nImg = $_POST['newImage'];
+                            $nBarang = $_POST['newBarang'];
+                            $nHarga = $_POST['newHarga'];
+                            $nDesk = $_POST['newDeskripsi'];
+                            $nStock = $_POST['newStock'];
+                            $nKategori = $_POST['newKategori'];
 
-                            $sql = "INSERT INTO users (username,password,user_telp,email,alamat,isAdmin) VALUES (?,?,?,?,?,0)";
+                            $sql = "INSERT INTO products (gambar,nama_product,harga_satuan,deskripsi,stock_product,kategori_id) VALUES (?,?,?,?,?,?)";
                             $stmt = $mysqli->prepare($sql);
-                            $stmt->bind_param("sssss", $nName, $nPass, $nTelp, $nEmail, $nAlamat);
+                            $stmt->bind_param("ssisii", $nImg, $nBarang, $nHarga, $nDesk, $nStock, $nKategori);
 
-                            if ($stmt->execute()) {
-                                // header('Location: home.php');
-                                exit();
-                            }
+                            echo '<meta http-equiv="refresh" content="0">';
                         }
                         ?>
                     </div>
@@ -148,6 +150,42 @@ session_start();
 
         <section id="editAdmin" style="display: none;" class="my-8 mx-3">
             <?php
+            // Process delete action
+            if (isset($_GET['deleteUser'])) {
+                $userId = $_GET['deleteUser'];
+
+                // Delete user from the database
+                $stmt = $mysqli->prepare("DELETE FROM users WHERE user_id = ?");
+                $stmt->bind_param("i", $userId);
+                $stmt->execute();
+            }
+
+            // Handle form submission for user update
+            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
+                // Get POST data
+                $userId = $_POST['user_id'];
+                $username = $_POST['username'];
+                $password = $_POST['password'];
+                $userTelp = $_POST['user_telp'];
+                $email = $_POST['email'];
+                $alamat = $_POST['alamat'];
+                $isAdmin = $_POST['isAdmin'];
+
+                // Prepare the update query
+                $stmt = $mysqli->prepare("UPDATE users SET username = ?, password = ?, user_telp = ?, email = ?, alamat = ?, isAdmin = ? WHERE user_id = ?");
+                $stmt->bind_param("sssssii", $username, $password, $userTelp, $email, $alamat, $isAdmin, $userId);
+
+                // Execute the query and check for success
+                if ($stmt->execute()) {
+                    echo "<script>alert('User updated successfully!');</script>";
+                } else {
+                    echo "Error: " . $stmt->error;
+                }
+                $stmt->close();
+                echo '<meta http-equiv="refresh" content="0">';
+            }
+
+            // Display users in the table
             echo '<table class="table-auto w-full border-collapse border border-gray-300">';
             echo '<thead>';
             echo '<tr class="bg-gray-200">';
@@ -163,8 +201,11 @@ session_start();
             echo '</thead>';
             echo '<tbody>';
 
+            // Fetch user list
             $stmt = $mysqli->query("SELECT user_id, username, password, user_telp, email, alamat, isAdmin FROM users");
             while ($row = $stmt->fetch_assoc()) {
+                $modalId = "usermodal" . $row['user_id'];  // Dynamic modal ID for each user
+
                 echo '<tr class="hover:bg-gray-100">';
                 echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['username']) . '</td>';
                 echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['password']) . '</td>';
@@ -173,15 +214,52 @@ session_start();
                 echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['alamat']) . '</td>';
                 echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['isAdmin']) . '</td>';
                 echo '<td class="border border-gray-300 py-2 text-center">
-                <button class="btn btn-warning" onclick="">Edit</button>
-                </td>';
+            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#' . $modalId . '">Edit</button>
+        </td>';
                 echo '<td class="border border-gray-300 py-2 text-center">
-                <button class="btn btn-danger" onclick="">Delete</button>
-                </td>';
+            <button class="btn btn-danger" onclick="deleteUser(' . $row['user_id'] . ')">Delete</button>
+        </td>';
+                echo '</tr>';
+
+                // Modal for editing the user
+                echo '<div class="modal fade" id="' . $modalId . '" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content rounded-md shadow-lg">
+                        <div class="modal-header border-b">
+                            <h5 class="modal-title text-xl font-bold text-gray-800">Edit User</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body gap-6 p-4">
+                            <!-- User Details Section -->
+                            <div class="space-y-3">
+                                <form action="adminPage.php" method="POST">
+                                    <input type="hidden" name="user_id" value="' . $row['user_id'] . '"><br>
+                                    <label>Username : </label><input type="text" name="username" value="' . htmlentities($row['username']) . '"><br>
+                                    <label>Password : </label><input type="text" name="password" value="' . htmlentities($row['password']) . '"><br>
+                                    <label>Telp : </label><input type="text" name="user_telp" value="' . htmlentities($row['user_telp']) . '"><br>
+                                    <label>Email : </label><input type="email" name="email" value="' . htmlentities($row['email']) . '"><br>
+                                    <label>Alamat : </label><input type="text" name="alamat" value="' . htmlentities($row['alamat']) . '"><br>
+                                    <label>isAdmin : </label><input type="text" name="isAdmin" value="' . htmlentities($row['isAdmin']) . '"><br>
+                                    <input type="submit" class="btn btn-primary" value="Update User">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>';
             }
             echo '</tbody>';
             echo '</table>';
             ?>
+
+            <script>
+                function deleteUser(userId) {
+                    // Confirm before deleting
+                    if (confirm("Are you sure you want to delete this user?")) {
+                        window.location.href = "adminPage.php?deleteUser=" + userId;
+                    }
+                }
+            </script>
         </section>
 
         <section id="listItem" style="display: none;">
@@ -238,11 +316,11 @@ session_start();
                                             <div class="space-y-3">
                                                 <form action="adminPage.php" method="POST">
                                                     <input type="hidden" name="product_id" value="<?= $product['id'] ?>"><br>
-                                                    <input type="text" name="gambar" value="<?= $product['image'] ?>"><br>
-                                                    <input type="text" name="nama_product" value="<?= $product['name'] ?>"><br>
-                                                    <input type="text" name="harga_satuan" value="<?= $product['price'] ?>"><br>
-                                                    <input type="text" name="deskripsi" value="<?= $product['description'] ?>"><br>
-                                                    <input type="text" name="stock_product" value="<?= $product['stock'] ?>"><br>
+                                                    <label>alamat gambar : </label><input type="text" name="gambar" value="<?= $product['image'] ?>"><br>
+                                                    <label>nama product : </label><input type="text" name="nama_product" value="<?= $product['name'] ?>"><br>
+                                                    <label>harga satuan : </label><input type="text" name="harga_satuan" value="<?= $product['price'] ?>"><br>
+                                                    <label>deskripsi product : </label><input type="text" name="deskripsi" value="<?= $product['description'] ?>"><br>
+                                                    <label>stock product : </label><input type="text" name="stock_product" value="<?= $product['stock'] ?>"><br>
                                                     <input type="submit" class="btn btn-primary" value="Update Product">
                                                 </form>
                                             </div>
@@ -280,7 +358,9 @@ session_start();
                         echo "Error: " . $stmt->error;
                     }
                     $stmt->close();
+                    echo '<meta http-equiv="refresh" content="0">';
                 }
+
                 ?>
             </div>
         </section>

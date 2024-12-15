@@ -47,7 +47,7 @@ session_start();
         </div>
     </nav>
 
-    <!-- buttons -->
+    <!-- buttons menu -->
     <section class="container-full">
         <div class="grid gap-8 grid-cols-3 px-3 pt-4 justify-items-between">
 
@@ -64,6 +64,7 @@ session_start();
             </a>
 
         </div>
+        <!--function toggle show/hide-->
         <script>
             function editAdmin() {
                 var z = document.getElementById("editAdmin");
@@ -128,6 +129,7 @@ session_start();
                         </div>
 
                         <?php
+                        # add item ke database
                         if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['newImage']) && isset($_POST['newBarang']) && isset($_POST['newHarga']) && isset($_POST['newDeskripsi']) && isset($_POST['newStock']) && isset($_POST['newKategori'])) {
                             $nImg = $_POST['newImage'];
                             $nBarang = $_POST['newBarang'];
@@ -150,19 +152,18 @@ session_start();
 
         <section id="editAdmin" style="display: none;" class="my-8 mx-3">
             <?php
-            // Process delete action
+            // set user yang akan di delete
             if (isset($_GET['deleteUser'])) {
                 $userId = $_GET['deleteUser'];
 
-                // Delete user from the database
+                // Delete user 
                 $stmt = $mysqli->prepare("DELETE FROM users WHERE user_id = ?");
                 $stmt->bind_param("i", $userId);
                 $stmt->execute();
             }
 
-            // Handle form submission for user update
+            // updating user ke database
             if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
-                // Get POST data
                 $userId = $_POST['user_id'];
                 $username = $_POST['username'];
                 $password = $_POST['password'];
@@ -171,11 +172,11 @@ session_start();
                 $alamat = $_POST['alamat'];
                 $isAdmin = $_POST['isAdmin'];
 
-                // Prepare the update query
+                // Prepare query
                 $stmt = $mysqli->prepare("UPDATE users SET username = ?, password = ?, user_telp = ?, email = ?, alamat = ?, isAdmin = ? WHERE user_id = ?");
                 $stmt->bind_param("sssssii", $username, $password, $userTelp, $email, $alamat, $isAdmin, $userId);
 
-                // Execute the query and check for success
+                // cek query
                 if ($stmt->execute()) {
                     echo "<script>alert('User updated successfully!');</script>";
                 } else {
@@ -185,7 +186,7 @@ session_start();
                 echo '<meta http-equiv="refresh" content="0">';
             }
 
-            // Display users in the table
+            // Display users di tabel
             echo '<table class="table-auto w-full border-collapse border border-gray-300">';
             echo '<thead>';
             echo '<tr class="bg-gray-200">';
@@ -204,7 +205,7 @@ session_start();
             // Fetch user list
             $stmt = $mysqli->query("SELECT user_id, username, password, user_telp, email, alamat, isAdmin FROM users");
             while ($row = $stmt->fetch_assoc()) {
-                $modalId = "usermodal" . $row['user_id'];  // Dynamic modal ID for each user
+                $modalId = "usermodal" . $row['user_id'];
 
                 echo '<tr class="hover:bg-gray-100">';
                 echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['username']) . '</td>';
@@ -221,7 +222,7 @@ session_start();
         </td>';
                 echo '</tr>';
 
-                // Modal for editing the user
+                // Modal edit user
                 echo '<div class="modal fade" id="' . $modalId . '" tabindex="-1" role="dialog" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                     <div class="modal-content rounded-md shadow-lg">
@@ -254,7 +255,7 @@ session_start();
 
             <script>
                 function deleteUser(userId) {
-                    // Confirm before deleting
+                    // alert sebelum delete
                     if (confirm("Are you sure you want to delete this user?")) {
                         window.location.href = "adminPage.php?deleteUser=" + userId;
                     }
@@ -265,14 +266,14 @@ session_start();
         <section id="listItem" style="display: none;">
             <div class="mx-3 grid grid-cols-4 gap-3 my-10">
                 <?php
-                // Fetch all products for the list
+                // Fetch semua product
                 $stmt = $mysqli->query("SELECT product_id, gambar, nama_product, harga_satuan, deskripsi, stock_product FROM products");
 
-                // Check if the query was successful
+                // Check apakah product telah terambil
                 if ($stmt === false) {
                     echo "Error in query: " . $mysqli->error;
                 } else {
-                    // Check if there are any products in the result
+                    // Check apakah ada product
                     if ($stmt->num_rows > 0) {
                         while ($row = $stmt->fetch_assoc()) {
                             // Prepare product data
@@ -296,7 +297,12 @@ session_start();
                                     <h5 class="card-title text-lg font-semibold text-gray-800"><?= $product['name']; ?></h5>
                                     <p class="card-text font-bold text-lg text-green-600">Rp. <?= number_format($product['price'], 0, ',', '.'); ?></p>
                                 </div>
-                                <button class="btn btn-warning mb-4 ml-auto mr-8 hover:text-white" data-bs-toggle="modal" data-bs-target="#<?= $modalId; ?>">Edit</button>
+                                <div class="grid grid-cols-2">
+                                    <button class="btn btn-danger mb-4 mr-auto ml-8 hover:text-white" onclick="deleteProduct(<?= $product['id']; ?>)">Delete</button>
+                                    <button class="btn btn-warning mb-4 ml-auto mr-8 hover:text-white" data-bs-toggle="modal" data-bs-target="#<?= $modalId; ?>">Edit</button>
+
+                                </div>
+
                             </div>
 
                             <!-- Product Modal -->
@@ -332,12 +338,12 @@ session_start();
                 <?php
                         }
                     } else {
-                        // If no products are found
+                        // jika no product
                         echo "No products available.";
                     }
                 }
 
-                // Handle form submission
+                // update data ke database
                 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id'])) {
                     $id = $_POST['product_id'];
                     $gambar = $_POST['gambar'];
@@ -346,12 +352,12 @@ session_start();
                     $deskripsi = $_POST['deskripsi'];
                     $stock_product = $_POST['stock_product'];
 
-                    // Prepare the update query
+                    // Prepare query
                     $sql = "UPDATE products SET gambar=?, nama_product=?, harga_satuan=?, deskripsi=?, stock_product=? WHERE product_id=?";
                     $stmt = $mysqli->prepare($sql);
                     $stmt->bind_param("ssisii", $gambar, $nama_product, $harga_satuan, $deskripsi, $stock_product, $id);
 
-                    // Execute the query and check for success
+                    // Execute query
                     if ($stmt->execute()) {
                         echo "<script>alert('Product updated successfully!');</script>";
                     } else {
@@ -361,7 +367,24 @@ session_start();
                     echo '<meta http-equiv="refresh" content="0">';
                 }
 
+                // set delete  ke product
+                if (isset($_GET['deleteProduct'])) {
+                    $ProductId = $_GET['deleteProduct'];
+
+                    // Delete user
+                    $stmt = $mysqli->prepare("DELETE FROM products WHERE product_id = ?");
+                    $stmt->bind_param("i", $ProductId);
+                    $stmt->execute();
+                }
                 ?>
+                <script>
+                    function deleteProduct(ProductId) {
+                        // alert sebelum delete
+                        if (confirm("Are you sure you want to delete this product?")) {
+                            window.location.href = "adminPage.php?deleteProduct=" + ProductId;
+                        }
+                    }
+                </script>
             </div>
         </section>
 

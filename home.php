@@ -1,6 +1,37 @@
 <?php
 require_once "connect.php";
 session_start();
+
+$where = '';
+$setKategori = '';
+$and = '';
+$setSearch = '';
+
+// Check apakah user punya checkout pending
+if (isset($_SESSION['user_id']) and $_SESSION['isAdmin'] != 1) {
+    $userID = $_SESSION['user_id'];
+    $date = date("y-m-d");
+
+    // Check apakah user punya cheout pending
+    $sql = "SELECT user_id, checkout_id FROM checkout WHERE status = 'Pending' AND user_id = ?";
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param("i", $userID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($row = $result->fetch_assoc()) {
+        // Kalo ada
+        $_SESSION['checkout_id'] = $row['checkout_id'];
+    } else {
+        // Kalo tidak ada, bikin baru
+        $sql = "INSERT INTO checkout (date, total_harga, user_id, payment_id, status) VALUES (?, 0, ?, 0, 'Pending')";
+        $stmt = $mysqli->prepare($sql);
+        $stmt->bind_param("si", $date, $userID);
+        $stmt->execute();
+
+        // Pakai checkout_id yang baru untuk cart
+        $_SESSION['checkout_id'] = $stmt->insert_id;
+    }
+}
 ?>
 
 <!doctype html>
@@ -72,13 +103,6 @@ session_start();
                     quantityElement.text(quantity); // Update
                     hiddenInput.val(quantity);
                 }
-
-                // jaga-jaga
-                if (stock < quantity) {
-                    quantity = stock;
-                    quantityElement.text(quantity);
-                    hiddenInput.val(quantity);
-                }
             });
 
             // Auto Sumbit Filter
@@ -91,12 +115,134 @@ session_start();
                 $(this).closest('form').submit();
 
             });
-
-
         });
     </script>
-
 </head>
+
+<?php
+
+// Search Bar
+if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName'])) {
+    $action = $_POST['actionName'];
+
+    if ($action == 'searchBar' and isset($_POST['kategori']) and isset($_POST['searchBar'])) {
+
+        // Kategori output
+        if ($_POST['kategori'] != "All") {
+            $setKategori = "kategori_id = " . $_POST['kategori'];
+        } else {
+            $setKategori = '';
+        }
+
+        // Search Bar output
+        if ($_POST['searchBar'] != "") {
+            $setSearch = "nama_product LIKE '%" . $_POST['searchBar'] . "%'";
+        } else {
+            $setSearch = '';
+        }
+
+        // WHERE
+        if ($setKategori != '' || $setSearch != '') {
+            $where = " WHERE ";
+        }
+
+        // AND
+        if ($setKategori != '' && $setSearch != '') {
+            $and = " AND ";
+        }
+    }
+}
+
+// add item ke cart user
+if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == "addToCart" and isset($_POST['product_id'])) {
+
+    if (isset($_POST['hidden-quantity-' . $_POST['product_id']])) {
+        $quantity = (int)$_POST['hidden-quantity-' . $_POST['product_id']];
+
+        if ($quantity >= 0) {
+            // Check if the product already exists in the cart (detailcheckout)
+            $checkCart = $mysqli->prepare("SELECT d.detail_id, d.jumlah_product, p.stock_product 
+                                            FROM detailcheckout d 
+                                            JOIN products p ON d.product_id = p.product_id 
+                                            WHERE d.checkout_id = ? AND d.product_id = ?");
+            $checkCart->bind_param("ii", $_SESSION['checkout_id'], $_POST['product_id']);
+            $checkCart->execute();
+            $checkResult = $checkCart->get_result();
+
+            if ($row = $checkResult->fetch_assoc()) {
+                // Kalo product sudah ada di checkout user
+                $quantityBef = $row['jumlah_product'];
+                $stock = $quantityBef - $quantity;
+
+                if ($quantity == 0) {
+                    // kalo 0 hilang dari cart
+                    $sql = "DELETE FROM detailCheckout WHERE detail_id = ? ";
+                    $deleteQuery2 = $mysqli->prepare($sql);
+                    $deleteQuery2->bind_param("i", $row['detail_id']);
+                    $deleteQuery2->execute();
+                } else {
+                    // quantity bukan 0 
+                    $updateCart = $mysqli->prepare("UPDATE detailcheckout SET jumlah_product = ? WHERE detail_id = ?");
+                    $updateCart->bind_param("ii", $quantity, $row['detail_id']);
+                    $updateCart->execute();
+                }
+            } else {
+
+                // Kalo product blm ada di checkout user
+                $insertStmt = $mysqli->prepare("INSERT INTO detailcheckout (checkout_id, product_id, jumlah_product) VALUES (?, ?, ?)");
+                $insertStmt->bind_param("iii", $_SESSION['checkout_id'], $_POST['product_id'], $quantity);
+                $insertStmt->execute();
+
+                $stock = 0 - $quantity;
+            }
+
+            // Update Stock product
+            $updateStock2 = $mysqli->prepare("UPDATE products SET stock_product = stock_product + ? WHERE product_id = ?");
+            $updateStock2->bind_param("ii", $stock, $_POST['product_id']);
+            $updateStock2->execute();
+
+            // refresh page
+            echo '<meta http-equiv="refresh" content="0">';
+        }
+    }
+}
+
+// delete item dari checkout
+if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName'])) {
+    $action = $_POST['actionName'];
+
+    if ($action == "delete") {
+        // delete item dari cart
+        $deleteQuery = $mysqli->prepare("DELETE FROM detailCheckout WHERE detail_id = ?");
+        $deleteQuery->bind_param("i", $_POST['detailID']);
+        $deleteQuery->execute();
+
+        // update stock
+        $stockNow = $_POST['jumProduct'] + $_POST['stock'];
+        $updateStock = $mysqli->prepare("UPDATE products SET stock_product = ? WHERE product_id = ?");
+        $updateStock->bind_param("ii", $stockNow, $_POST['productID']);
+        $updateStock->execute();
+
+        // refresh page
+        echo '<meta http-equiv="refresh" content="0">';
+    }
+}
+
+// Checkout function (completed transaction)
+if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' and isset($_POST['payment']) and isset($_POST['haveItem'])) {
+    if ($_POST['payment'] != 0 and $_POST['haveItem'] == TRUE) {
+        $sql = "UPDATE checkout SET date = ?, payment_id = ?, status = 'Completed' WHERE checkout_id = ?";
+        $checkoutQuery = $mysqli->prepare($sql);
+        $payment_id = $_POST['payment'];
+        $checkoutQuery->bind_param("sii", $date, $payment_id, $_SESSION['checkout_id']);
+        $checkoutQuery->execute();
+
+        // refresh page
+        echo '<meta http-equiv="refresh" content="0">';
+    }
+}
+
+?>
 
 <body>
     <!-- navbar -->
@@ -104,57 +250,44 @@ session_start();
         <a class="navbar-brand pl-12 text-yellow-400 hover:text-white hover:font-semibold" href="home.php">Toko Online</a>
         <div class="navbar justify-content-between">
             <ul class="navbar-nav mr-auto gap-3">
-                <li class="nav-item"><!-- TODO: belum connect -->
-                    <a class="nav-link text-yellow-400 hover:text-white hover:font-semibold" href="">Profile</a>
-                </li>
                 <li class="nav-item">
-                    <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="userHistory.php">History</a>
+                    <a class="nav-link text-yellow-400 hover:text-white hover:font-semibold" href="profil.php">Profile</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="adminPage.php">Admin</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="adminHistory.php">Admin History</a>
-                </li>
+
+                <?php
+                // User Only
+                if ($_SESSION['isAdmin'] == 0) {
+                    echo '<li class="nav-item">
+                            <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="userHistory.php">History</a>
+                          </li>';
+                }
+                ?>
+
+                <?php
+                // Admin Only
+                if ($_SESSION['isAdmin'] == 1) {
+                ?>
+                    <li class="nav-item">
+                        <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="adminPage.php">Admin</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="adminHistory.php">Admin History</a>
+                    </li>
+                <?php
+                }
+                ?>
+
             </ul>
         </div>
-        <button type="button" class="hover:bg-yellow-400 bg-yellow-500 font-semibold  text-black px-5 py-2 rounded-lg text-sm ml-auto mr-14" data-bs-toggle="modal" data-bs-target="#checkout">
-            Cart
-        </button>
-    </nav>
 
-    <?php
-
-    // Check apakah user punya checkout pending
-    if (isset($_SESSION['user_id'])) {
-        $userID = $_SESSION['user_id'];
-        $date = date("Y-m-d");
-
-        // Check apakah user punya cheout pending
-        $sql = "SELECT user_id, checkout_id FROM checkout WHERE status = 'Pending' AND user_id = ?";
-        $stmt = $mysqli->prepare($sql);
-        $stmt->bind_param("i", $userID);
-        $stmt->execute();
-
-        // Get the result
-        $result = $stmt->get_result();
-
-        if ($row = $result->fetch_assoc()) {
-            // Kalo ada
-            $_SESSION['checkout_id'] = $row['checkout_id'];
-        } else {
-            // Kalo tidak ada, bikin baru
-            $sql = "INSERT INTO checkout (date, total_harga, user_id, payment_id, status) VALUES (?, 0, ?, 0, 'Pending')";
-            $stmt = $mysqli->prepare($sql);
-
-            $stmt->bind_param("si", $date, $userID);  // "s" for string (date), "i" for integer (user_id)
-            $stmt->execute();
-
-            // Optionally, you can store the newly created checkout_id in the session if needed
-            $_SESSION['checkout_id'] = $stmt->insert_id;
+        <?php
+        // User Only
+        if ($_SESSION['isAdmin'] == 0) {
+            echo '<button type="button" class="hover:text-white bg-yellow-400  font-semibold  px-5 py-2 rounded-lg text-sm ml-auto mr-14" data-bs-toggle="modal" data-bs-target="#checkout">Cart</button>';
         }
-    }
-    ?>
+        ?>
+
+    </nav>
 
     <!-- Checkout Modal -->
     <div class="modal fade" id="checkout" tabindex="-1" role="dialog" aria-hidden="true">
@@ -164,11 +297,11 @@ session_start();
                     <h5 class="modal-title text-xl font-bold text-gray-800">Checkout Cart</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body gap-6 p-4">
+                <div class="modal-body gap-6 p-4 pb-0">
 
                     <!-- Details Section -->
                     <?php
-                    $stmt = $mysqli->prepare("SELECT d.detail_id, p.nama_product, d.jumlah_product, p.harga_satuan
+                    $stmt = $mysqli->prepare("SELECT d.detail_id, p.product_id, p.nama_product, d.jumlah_product, p.stock_product, p.harga_satuan
                                         FROM detailcheckout d
                                         JOIN products p ON d.product_id = p.product_id
                                         WHERE d.checkout_id = ?");
@@ -191,34 +324,69 @@ session_start();
                                 <!-- Quantity (centered) -->
                                 <p class="mb-0 text-center text-gray-600 font-medium"><?= $row['jumlah_product']; ?></p>
 
-                                <!-- Close Button (right-aligned) TODO: blm punya function -->
-                                <button type="button" class="btn-close justify-self-end"></button>
+                                <!-- Close Button (right-aligned) -->
+                                <form method="POST">
+                                    <div class="justify-self-end">
+
+                                        <!-- data untuk post nanti -->
+                                        <input type="hidden" name="actionName" value="delete">
+                                        <input type="hidden" name="detailID" value="<?= $row['detail_id'] ?>">
+                                        <input type="hidden" name="stock" value="<?= $row['stock_product'] ?>">
+                                        <input type="hidden" name="jumProduct" value="<?= $row['jumlah_product'] ?>">
+                                        <input type="hidden" name="productID" value="<?= $row['product_id'] ?>">
+                                        <button type="submit" class="btn-close"></button>
+                                    </div>
+                                </form>
+
                             </div>
                         </div>
                     <?php
                     }
 
                     if (!$haveItem) {
-                        echo '<div>No Item In Cart</div>';
+                        echo '<p class="text-xl text-center font-semibold text-black">No Item in Cart</p>';
+                    }
+
+                    $getTotal = $mysqli->prepare("SELECT * FROM checkout WHERE checkout_id = ?");
+                    $getTotal->bind_param('i', $_SESSION['checkout_id']);
+                    $getTotal->execute();
+                    $result = $getTotal->get_result();
+                    if ($haveItem and $row = $result->fetch_assoc()) {
+                        echo '<div class="px-2 flex justify-between items-center">
+                                <p class="font-medium text-black">Total Harga Cart : </p>
+                                <p class="font-semibold text-xl text-green-600">Rp. ' . number_format($row['total_harga'], 0, ',', '.') . '</p>
+                              </div>';
                     }
                     ?>
 
-                    <!-- Payment Method -->
-                    <div class="flex items-center space-x-2 mt-3">
-                        <label class="font-medium text-black" for="payment">Select Payment Method: </label>
-                        <select id="payment" name="payment" class="border-none bg-transparent rounded-lg focus:outline-none text-black">
-                            <?php
-                            $stmt = $mysqli->query("SELECT payment_id, payment_method FROM payment");
-                            while ($row = $stmt->fetch_assoc()) {
-                                echo '<option value="' . htmlentities($row['payment_id']) . '" ' . $selected . '>' . htmlentities($row['payment_method']) . '</option>';
-                            }
-                            ?>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer border-t px-4 py-3">
-                    <!-- Checkout Button TODO: blm ada function-->
-                    <button type="button" class="btn btn-primary px-5 py-2 rounded-lg text-sm">Checkout</button>
+                    <form method="POST">
+                        <input type="hidden" name="actionName" value="checkout">
+                        <input type="hidden" name="haveItem" value="<?= $haveItem ?>">
+
+                        <!-- Payment Method Selection -->
+                        <div class="flex items-center space-x-2 mt-2 mb-3 mx-2">
+                            <label class="font-medium text-black" for="payment">Select Payment Method : </label>
+                            <select id="payment" name="payment" class="border-none bg-transparent rounded-lg focus:outline-none text-black">
+                                <?php
+
+                                // pilihan opsi payment method dari database
+                                $stmt = $mysqli->query("SELECT payment_id, payment_method FROM payment");
+                                while ($row = $stmt->fetch_assoc()) {
+                                    $selected = (isset($_POST['payment']) && $_POST['payment'] == $row['payment_id']) ? 'selected' : '';
+                                    echo '<option value="' . htmlentities($row['payment_id']) . '" ' . $selected . '>' . htmlentities($row['payment_method']) . '</option>';
+                                }
+                                ?>
+
+                            </select>
+                        </div>
+
+                        <!-- Checkout Button -->
+                        <div class="modal-footer border-t px-4 py-3">
+
+                            <button type="submit" class="btn btn-primary px-5 py-2 rounded-lg text-sm">Checkout</button>
+                        </div>
+                    </form>
+
                 </div>
             </div>
         </div>
@@ -226,7 +394,9 @@ session_start();
 
     <!-- Kategori + Search Bar  -->
     <div class="m-3">
-        <form id="filter" class="flex items-center bg-gray-100 rounded-lg shadow-md px-4 py-2 space-x-3" method="post">
+        <form id="filter" class="flex items-center bg-gray-100 rounded-lg shadow-md px-4 py-2 space-x-3" method="POST">
+            <input type="hidden" name="actionName" value="searchBar">
+
             <!-- Category Dropdown -->
             <div class="flex items-center space-x-2 pr-3">
                 <label class="font-medium text-gray-600" for="kategori">Kategori: </label>
@@ -234,12 +404,14 @@ session_start();
                     <option value="All">All</option>
 
                     <?php
+                    // untuk opsi kategori lain dari database
                     $stmt = $mysqli->query("SELECT kategori_id, nama_kategori FROM kategori");
                     while ($row = $stmt->fetch_assoc()) {
-                        $selected = ($_POST['kategori'] == $row['kategori_id']) ? 'selected' : ''; // agar tidak reset
+                        $selected = ($_POST['kategori'] == $row['kategori_id']) ? 'selected' : ''; // agar tidak reset saat refresh
                         echo '<option value="' . htmlentities($row['kategori_id']) . '" ' . $selected . '>' . htmlentities($row['nama_kategori']) . '</option>';
                     }
                     ?>
+
                 </select>
             </div>
 
@@ -254,8 +426,6 @@ session_start();
                     echo 'value="' . htmlspecialchars($_POST['searchBar']) . '"';
                 }
                 ?>>
-
-
         </form>
     </div>
 
@@ -264,41 +434,10 @@ session_start();
     <div class=" m-3 grid grid-cols-4 gap-3">
 
         <?php
-        $where = '';
-        $setKategori = '';
-        $and = '';
-        $setSearch = '';
 
-
-        if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['kategori']) and isset($_POST['searchBar'])) {
-            // Kategori output
-            if ($_POST['kategori'] != "All") {
-                $setKategori = "kategori_id = " . $_POST['kategori'];
-            } else {
-                $setKategori = '';
-            }
-
-            // Search Bar output
-            if ($_POST['searchBar'] != "") {
-                $setSearch = "nama_product LIKE '%" . $_POST['searchBar'] . "%'";
-            } else {
-                $setSearch = '';
-            }
-
-            // WHERE
-            if ($setKategori != '' || $setSearch != '') {
-                $where = " WHERE ";
-            }
-
-            // AND
-            if ($setKategori != '' && $setSearch != '') {
-                $and = " AND ";
-            }
-        }
-
-        $stmt = $mysqli->query("SELECT product_id, gambar, nama_product, harga_satuan, deskripsi, stock_product FROM products " . $where .  $setKategori . $and . $setSearch);
-        
-        while ($row = $stmt->fetch_assoc()) {
+        $result = $mysqli->query("SELECT product_id, gambar, nama_product, harga_satuan, deskripsi, stock_product 
+                                FROM products " . $where .  $setKategori . $and . $setSearch);
+        while ($row = $result->fetch_assoc()) {
 
             // product element
             $product = [
@@ -347,34 +486,44 @@ session_start();
                                 <p class="text-sm text-black font-medium">Stock: <?= $product['stock']; ?></p>
                             </div>
                         </div>
-                        <form method="post">
+
+                        <form method="POST">
+                            <input type="hidden" name="actionName" value="addToCart">
+                            <input type="hidden" name="product_id" value="<?= $product['id']; ?>">
                             <div class="modal-footer border-t flex justify-between items-center px-4 py-3">
                                 <!-- Quantity Control -->
                                 <div class="grid grid-cols-3 items-center">
-                                    <!-- "javascript:void(0);" supaya page nya tidak refresh -->
-                                    <a href="javascript:void(0);" class="btn btn-danger text-center size-10 minus-btn" data-id="<?= $product['id']; ?>">-</a>
-                                    <p id="quantity-<?= $product['id']; ?>" name="quantity-<?= $product['id']; ?>" class="text-center quantity-display">0</p>
-                                    <a href="javascript:void(0);" class="btn btn-success text-center size-10 add-btn" data-id="<?= $product['id']; ?>" data-stock="<?= $product['stock']; ?>">+</a>
+
+                                    <!-- "-" Button , "javascript:void(0);" supaya page nya tidak refresh -->
+                                    <a href="javascript:void(0);" class="btn btn-danger text-center size-10 minus-btn <?= $_SESSION['isAdmin'] == 1 ? 'disabled' : '' ?>" data-id="<?= $product['id'] ?>">-</a>
+
+
+                                    <?php
+                                    // untuk display angka quantity
+                                    $checkQuatity = $mysqli->prepare("SELECT detail_id, jumlah_product FROM detailcheckout WHERE checkout_id = ? AND product_id = ?");
+                                    $checkQuatity->bind_param("ii", $_SESSION['checkout_id'], $product['id']);
+                                    $checkQuatity->execute();
+                                    $checkResult = $checkQuatity->get_result();
+                                    if ($row = $checkResult->fetch_assoc()) {
+                                        // kalo ada item di cart
+                                        echo '<p id="quantity-' . $product['id'] . '" name="quantity-' . $product['id'] . '" class="text-center quantity-display">' . $row['jumlah_product'] . '</p>';
+                                    } else {
+                                        // kalo tidak ada di cart
+                                        echo '<p id="quantity-' . $product['id'] . '" name="quantity-' . $product['id'] . '" class="text-center quantity-display">0</p>';
+                                    }
+                                    ?>
+
+                                    <!-- "+" Button -->
+                                    <a href="javascript:void(0);" class="btn btn-success text-center size-10 add-btn <?= $_SESSION['isAdmin'] == 1 ? 'disabled' : '' ?>" data-id="<?= $product['id']; ?>" data-stock="<?= $product['stock']; ?>">+</a>
                                 </div>
+
                                 <!-- Hidden input untuk kirim quantity ke php -->
                                 <input type="hidden" id="hidden-quantity-<?= $product['id']; ?>" name="hidden-quantity-<?= $product['id']; ?>" value="0">
 
                                 <!-- Add to Cart Button -->
-                                <button type="submit" class="btn btn-primary px-5 py-2 rounded-lg text-sm">Add To Cart</button>
+                                <button type="submit" class="btn btn-primary px-5 py-2 rounded-lg text-sm <?= $_SESSION['isAdmin'] == 1 ? 'disabled' : '' ?>">Add To Cart</button>
                         </form>
 
-                        <?php
-                        // FIXME: 
-                        // if (isset($_POST['hidden-quantity-' . $product['id']])) {
-                        //     $quantity = (int)$_POST['hidden-quantity-' . $product['id']];
-                        //     if ($quantity > 0) {
-                        //         $sql = "INSERT INTO detailcheckout (detail_id, product_id, jumlah_product, checkout_id) VALUES (NULL, ?, ?, ?)";
-                        //         $stmt = $mysqli->prepare($sql);
-                        //         $stmt->bind_param("iii", $product['id'], $quantity, $_SESSION['checkout_id']);
-                        //         $stmt->execute();
-                        //     }
-                        // }
-                        ?>
                     </div>
                 </div>
             </div>
@@ -382,10 +531,24 @@ session_start();
 
 <?php
         }
+
+        // Hitung total_harga
+        $checkSum = $mysqli->prepare("SELECT SUM(d.jumlah_product * p.harga_satuan) AS total_price
+                                    FROM detailcheckout d
+                                    JOIN products p ON d.product_id = p.product_id
+                                    WHERE d.checkout_id = ?");
+        $checkSum->bind_param("i", $_SESSION['checkout_id']);
+        $checkSum->execute();
+        $checkResult = $checkSum->get_result();
+
+        if ($row = $checkResult->fetch_assoc()) {
+            // Update total_harga
+            $priceUpdate = $mysqli->prepare("UPDATE checkout SET total_harga = ? WHERE checkout_id = ?");
+            $priceUpdate->bind_param("ii", $row['total_price'], $_SESSION['checkout_id']);
+            $priceUpdate->execute();
+        }
+
 ?>
-
-</div>
-
 </body>
 
 </html>

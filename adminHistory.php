@@ -30,25 +30,7 @@ session_start();
 
 <body>
     <!-- navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-dark sticky fixed-top gap-2">
-        <a class="navbar-brand pl-12 text-yellow-400 hover:text-white hover:font-semibold" href="home.php">Toko Online</a>
-        <div class="navbar justify-content-between">
-            <ul class="navbar-nav mr-auto gap-3">
-                <li class="nav-item"><!-- TODO: belum connect -->
-                    <a class="nav-link text-yellow-400 hover:text-white hover:font-semibold" href="">Profile</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="userHistory.php">History</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="adminPage.php">Admin</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="adminHistory.php">Admin History</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
+    <?php include 'nav.php'; ?>
 
     <section>
         <div class="container mx-auto py-6">
@@ -119,33 +101,21 @@ session_start();
                                 <td class="px-4 py-3 font-semibold text-green-600">Rp. <?= number_format($checkout['total_harga'], 0, ',', '.'); ?></td>
                                 <td class="px-4 py-3"><?= $checkout['payment_type']; ?></td>
                                 <td class="px-4 py-3">
-                                    <span class="px-2 py-1 bg-yellow-300 text-yellow-700 text-xs font-medium rounded-full"><?= $checkout['status']; ?></span>
+
+                                    <!-- Pending / Completed -->
+                                    <?php
+                                    if ($checkout['status'] == "Pending") {
+                                        echo '<span class="px-2 py-1 bg-yellow-300 text-yellow-700 text-xs font-medium rounded-full">' . $checkout['status'] . '</span>';
+                                    } else {
+                                        echo '<span class="px-2 py-1 bg-green-300 text-green-700 text-xs font-medium rounded-full">' . $checkout['status'] . '</span>';
+                                    }
+                                    ?>
                                 </td>
                             </tr>
 
                         <?php
                         }
                         ?>
-
-
-                        <!-- Simpanan sementera untuk status Completed -->
-                        <tr class="bg-gray-50">
-                            <td class="px-4 py-3">ID</td>
-                            <td class="px-4 py-3">Date</td>
-                            <td class="px-4 py-3">UserID</td>
-                            <td class="px-4 py-3 font-semibold text-blue-600">Test</td>
-                            <td class="px-4 py-3">
-                                <ul class="list-disc pl-5 text-left">
-                                    <li>Item C (3 x $8) = $24</li>
-                                    <li>Item D (1 x $25) = $25</li>
-                                </ul>
-                            </td>
-                            <td class="px-4 py-3 font-semibold text-green-600">$49</td>
-                            <td class="px-4 py-3">PaymentType</td>
-                            <td class="px-4 py-3">
-                                <span class="px-2 py-1 bg-green-300 text-green-700 text-xs font-medium rounded-full">Completed</span>
-                            </td>
-                        </tr>
                     </tbody>
                 </table>
             </div>

@@ -155,7 +155,7 @@ session_start();
 
     <!-- Tabel Users -->
     <section class="container mx-auto my-10">
-        <h1>Tabel Users utk Testing</h1>
+        <h1>Tabel Users (nanti di hide)</h1>
         <?php
         echo '<table class="table-auto w-full border-collapse border border-gray-300">';
         echo '<thead>';

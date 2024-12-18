@@ -117,9 +117,14 @@ session_start();
 
             </ul>
         </div>
-        <button type="button" class="hover:text-white bg-yellow-400  font-semibold  px-5 py-2 rounded-lg text-sm ml-auto mr-14" data-bs-toggle="modal" data-bs-target="#checkout">
-            Cart
-        </button>
+
+        <?php
+        // User Only
+        if ($_SESSION['isAdmin'] == 0) {
+            echo '<button type="button" class="hover:text-white bg-yellow-400  font-semibold  px-5 py-2 rounded-lg text-sm ml-auto mr-14" data-bs-toggle="modal" data-bs-target="#checkout">Cart</button>';
+        }
+        ?>
+
     </nav>
 
     <?php
@@ -167,7 +172,7 @@ session_start();
 
                     <!-- Details Section -->
                     <?php
-                    $stmt = $mysqli->prepare("SELECT d.detail_id, p.product_id, p.nama_product, d.jumlah_product, p.harga_satuan
+                    $stmt = $mysqli->prepare("SELECT d.detail_id, p.product_id, p.nama_product, d.jumlah_product, p.stock_product, p.harga_satuan
                                         FROM detailcheckout d
                                         JOIN products p ON d.product_id = p.product_id
                                         WHERE d.checkout_id = ?");
@@ -193,13 +198,15 @@ session_start();
                                 <!-- Close Button (right-aligned) -->
                                 <form method="POST">
                                     <div class="justify-self-end">
+
+                                        <!-- data untuk post nanti -->
                                         <input type="hidden" name="actionName" value="delete">
-                                        <input type="hidden" name="detailID" value="<?= $row['detail_id']; ?>">
-                                        <input type="hidden" name="jumProduct" value="<?= $row['jumlah_product']; ?>">
-                                        <input type="hidden" name="productID" value="<?= $row['product_id']; ?>">
+                                        <input type="hidden" name="detailID" value="<?= $row['detail_id'] ?>">
+                                        <input type="hidden" name="stock" value="<?= $row['stock_product'] ?>">
+                                        <input type="hidden" name="jumProduct" value="<?= $row['jumlah_product'] ?>">
+                                        <input type="hidden" name="productID" value="<?= $row['product_id'] ?>">
                                         <button type="submit" class="btn-close"></button>
                                     </div>
-
                                 </form>
 
 
@@ -209,15 +216,16 @@ session_start();
                                     $action = $_POST['actionName'];
 
                                     if ($action == "delete") {
-                                        $sql = "DELETE FROM detailCheckout WHERE detail_id = ? ";
-                                        $deleteQuery = $mysqli->prepare($sql);
+                                        // delete item dari cart
+                                        $deleteQuery = $mysqli->prepare("DELETE FROM detailCheckout WHERE detail_id = ?");
                                         $deleteQuery->bind_param("i", $_POST['detailID']);
                                         $deleteQuery->execute();
 
-                                        // TODO: update 2 kali some how
-                                        $updateStock = $mysqli->prepare("UPDATE products SET stock_product = stock_product + ? WHERE product_id = ?;");
-                                        $updateStock->bind_param("ii", $_POST['jumProduct'], $_POST['productID']);
-                                        // $updateStock->execute();
+                                        // update stock
+                                        $stockNow = $_POST['jumProduct'] + $_POST['stock'];
+                                        $updateStock = $mysqli->prepare("UPDATE products SET stock_product = ? WHERE product_id = ?");
+                                        $updateStock->bind_param("ii", $stockNow, $_POST['productID']);
+                                        $updateStock->execute();
 
                                         // refresh page
                                         echo '<meta http-equiv="refresh" content="0">';
@@ -241,12 +249,15 @@ session_start();
                             <label class="font-medium text-black" for="payment">Select Payment Method: </label>
                             <select id="payment" name="payment" class="border-none bg-transparent rounded-lg focus:outline-none text-black">
                                 <?php
+
+                                // pilihan opsi payment method dari database
                                 $stmt = $mysqli->query("SELECT payment_id, payment_method FROM payment");
                                 while ($row = $stmt->fetch_assoc()) {
                                     $selected = (isset($_POST['payment']) && $_POST['payment'] == $row['payment_id']) ? 'selected' : '';
                                     echo '<option value="' . htmlentities($row['payment_id']) . '" ' . $selected . '>' . htmlentities($row['payment_method']) . '</option>';
                                 }
                                 ?>
+
                             </select>
                         </div>
 
@@ -258,10 +269,9 @@ session_start();
 
                     <?php
                     // Checkout function (completed transaction)
-                    if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName']) and isset($_POST['payment'])) {
-                        $action = $_POST['actionName'];
+                    if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' and isset($_POST['payment'])) {
 
-                        if ($action == "checkout" and $_POST['payment'] != 0) {
+                        if ($_POST['payment'] != 0) {
                             $sql = "UPDATE checkout SET date = ?, payment_id = ?, status = 'Completed' WHERE checkout_id = ?";
                             $checkoutQuery = $mysqli->prepare($sql);
                             $payment_id = $_POST['payment'];
@@ -290,12 +300,14 @@ session_start();
                     <option value="All">All</option>
 
                     <?php
+                    // untuk opsi kategori lain dari database
                     $stmt = $mysqli->query("SELECT kategori_id, nama_kategori FROM kategori");
                     while ($row = $stmt->fetch_assoc()) {
-                        $selected = ($_POST['kategori'] == $row['kategori_id']) ? 'selected' : ''; // agar tidak reset
+                        $selected = ($_POST['kategori'] == $row['kategori_id']) ? 'selected' : ''; // agar tidak reset saat refresh
                         echo '<option value="' . htmlentities($row['kategori_id']) . '" ' . $selected . '>' . htmlentities($row['nama_kategori']) . '</option>';
                     }
                     ?>
+
                 </select>
             </div>
 
@@ -412,16 +424,17 @@ session_start();
                             <div class="modal-footer border-t flex justify-between items-center px-4 py-3">
                                 <!-- Quantity Control -->
                                 <div class="grid grid-cols-3 items-center">
-                                    <!-- "javascript:void(0);" supaya page nya tidak refresh -->
 
-                                    <a href="javascript:void(0);" class="btn btn-danger text-center size-10 minus-btn" data-id="<?= $product['id']; ?>">-</a>
+                                    <!-- "-" Button , "javascript:void(0);" supaya page nya tidak refresh -->
+                                    <a href="javascript:void(0);" class="btn btn-danger text-center size-10 minus-btn <?= $_SESSION['isAdmin'] == 1 ? 'disabled' : '' ?>" data-id="<?= $product['id'] ?>">-</a>
+
 
                                     <?php
+                                    // untuk display angka quantity
                                     $checkQuatity = $mysqli->prepare("SELECT detail_id, jumlah_product FROM detailcheckout WHERE checkout_id = ? AND product_id = ?");
                                     $checkQuatity->bind_param("ii", $_SESSION['checkout_id'], $product['id']);
                                     $checkQuatity->execute();
                                     $checkResult = $checkQuatity->get_result();
-
                                     if ($row = $checkResult->fetch_assoc()) {
                                         // kalo ada item di cart
                                         echo '<p id="quantity-' . $product['id'] . '" name="quantity-' . $product['id'] . '" class="text-center quantity-display">' . $row['jumlah_product'] . '</p>';
@@ -430,7 +443,9 @@ session_start();
                                         echo '<p id="quantity-' . $product['id'] . '" name="quantity-' . $product['id'] . '" class="text-center quantity-display">0</p>';
                                     }
                                     ?>
-                                    <a href="javascript:void(0);" class="btn btn-success text-center size-10 add-btn" data-id="<?= $product['id']; ?>" data-stock="<?= $product['stock']; ?>">+</a>
+
+                                    <!-- "+" Button -->
+                                    <a href="javascript:void(0);" class="btn btn-success text-center size-10 add-btn <?= $_SESSION['isAdmin'] == 1 ? 'disabled' : '' ?>" data-id="<?= $product['id']; ?>" data-stock="<?= $product['stock']; ?>">+</a>
                                 </div>
 
                                 <!-- Hidden input untuk kirim quantity ke php -->
@@ -457,6 +472,7 @@ session_start();
                                     $checkResult = $checkCart->get_result();
 
                                     if ($row = $checkResult->fetch_assoc()) {
+                                        // Kalo product sudah ada di checkout user
                                         $quantityBef = $row['jumlah_product'];
                                         $stock = $quantityBef - $quantity;
 
@@ -466,14 +482,14 @@ session_start();
                                             $deleteQuery2 = $mysqli->prepare($sql);
                                             $deleteQuery2->bind_param("i", $row['detail_id']);
                                             $deleteQuery2->execute();
+                                        } else {
+                                            // quantity bukan 0 
+                                            $updateCart = $mysqli->prepare("UPDATE detailcheckout SET jumlah_product = ? WHERE detail_id = ?");
+                                            $updateCart->bind_param("ii", $quantity, $row['detail_id']);
+                                            $updateCart->execute();
                                         }
-
-
-                                        // Kalo product sudah ada di checkout user
-                                        $updateCart = $mysqli->prepare("UPDATE detailcheckout SET jumlah_product = ? WHERE detail_id = ?");
-                                        $updateCart->bind_param("ii", $quantity, $row['detail_id']);
-                                        $updateCart->execute();
                                     } else {
+
                                         // Kalo product blm ada di checkout user
                                         $insertStmt = $mysqli->prepare("INSERT INTO detailcheckout (checkout_id, product_id, jumlah_product) VALUES (?, ?, ?)");
                                         $insertStmt->bind_param("iii", $_SESSION['checkout_id'], $product['id'], $quantity);
@@ -483,7 +499,7 @@ session_start();
                                     }
 
                                     // Update Stock product
-                                    $updateStock2 = $mysqli->prepare("UPDATE products SET stock_product = stock_product + ? WHERE product_id = ?;");
+                                    $updateStock2 = $mysqli->prepare("UPDATE products SET stock_product = stock_product + ? WHERE product_id = ?");
                                     $updateStock2->bind_param("ii", $stock, $product['id']);
                                     $updateStock2->execute();
 

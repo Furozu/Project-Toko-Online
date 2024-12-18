@@ -10,7 +10,7 @@ $setSearch = '';
 // Check apakah user punya checkout pending
 if (isset($_SESSION['user_id']) and $_SESSION['isAdmin'] != 1) {
     $userID = $_SESSION['user_id'];
-    $date = date("Y-m-d");
+    $date = date("y-m-d");
 
     // Check apakah user punya cheout pending
     $sql = "SELECT user_id, checkout_id FROM checkout WHERE status = 'Pending' AND user_id = ?";

@@ -93,7 +93,7 @@ session_start();
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="myLargeModalLabel">Daftar</h5>
+                            <h5 class="modal-title text-xl font-bold text-gray-800" id="myLargeModalLabel">Add Product</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
 
@@ -101,8 +101,8 @@ session_start();
                             <!-- Form for creating a new account -->
                             <form method="post">
                                 <div class="form-group mb-3">
-                                    <label for="newImage">Gambar</label>
-                                    <input type="text" class="form-control" id="newImage" name="newImage" placeholder="Enter ImageAddress" required>
+                                    <label for="newImage">Link Gambar</label>
+                                    <input type="text" class="form-control" id="newImage" name="newImage" placeholder="Enter Image Address" required>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="newBarang">Nama barang</label>
@@ -120,11 +120,21 @@ session_start();
                                     <label for="newStock">Stock</label>
                                     <input type="text" class="form-control" id="newStock" name="newStock" placeholder="Enter Stock" required>
                                 </div>
-                                <div class="form-group mb-3">
-                                    <label for="newKategori">Kategori</label>
-                                    <input type="text" class="form-control" id="newKategori" name="newKategori" placeholder="Enter Kategori" required>
+                                <div class="flex items-center pr-3 mb-3">
+                                    <label class="font-medium text-gray-600 mr-4" for="kategori">Kategori : </label>
+                                    <select id="newKategori" name="newKategori" class="border-none bg-transparent rounded-lg focus:outline-none text-gray-700">
+                                        <?php
+                                        $stmt = $mysqli->query("SELECT kategori_id, nama_kategori FROM kategori");
+                                        while ($row = $stmt->fetch_assoc()) {
+                                            $selected = (isset($_POST['newKategori']) && $_POST['newKategori'] == $row['kategori_id']) ? 'selected' : '';
+                                            echo '<option value="' . htmlentities($row['kategori_id']) . '" ' . $selected . '>' . htmlentities($row['nama_kategori']) . '</option>';
+                                        }
+                                        ?>
+                                    </select>
                                 </div>
-                                <button type="submit" class="btn btn-warning">Add Product</button>
+                                <div class="flex justify-end">
+                                    <button type="submit" class="btn btn-warning font-semibold">Add Product</button>
+                                </div>
                             </form>
                         </div>
 
@@ -141,7 +151,12 @@ session_start();
                             $sql = "INSERT INTO products (gambar,nama_product,harga_satuan,deskripsi,stock_product,kategori_id) VALUES (?,?,?,?,?,?)";
                             $stmt = $mysqli->prepare($sql);
                             $stmt->bind_param("ssisii", $nImg, $nBarang, $nHarga, $nDesk, $nStock, $nKategori);
-
+                            if ($stmt->execute()) {
+                                echo "<script>alert('Product Added successfully!');</script>";
+                            } else {
+                                echo "Error: " . $stmt->error;
+                            }
+                            $stmt->close();
                             echo '<meta http-equiv="refresh" content="0">';
                         }
                         ?>
@@ -215,10 +230,10 @@ session_start();
                 echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['alamat']) . '</td>';
                 echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['isAdmin']) . '</td>';
                 echo '<td class="border border-gray-300 py-2 text-center">
-            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#' . $modalId . '">Edit</button>
+            <button class="btn btn-warning font-semibold" data-bs-toggle="modal" data-bs-target="#' . $modalId . '">Edit</button>
         </td>';
                 echo '<td class="border border-gray-300 py-2 text-center">
-            <button class="btn btn-danger" onclick="deleteUser(' . $row['user_id'] . ')">Delete</button>
+            <button class="btn btn-danger font-semibold" onclick="deleteUser(' . $row['user_id'] . ')">Delete</button>
         </td>';
                 echo '</tr>';
 
@@ -230,18 +245,20 @@ session_start();
                             <h5 class="modal-title text-xl font-bold text-gray-800">Edit User</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body gap-6 p-4">
+                        <div class="modal-body gap-6 px-4 pb-4">
                             <!-- User Details Section -->
-                            <div class="space-y-3">
+                            <div class="">
                                 <form action="adminPage.php" method="POST">
-                                    <input type="hidden" name="user_id" value="' . $row['user_id'] . '"><br>
-                                    <label>Username : </label><input type="text" name="username" value="' . htmlentities($row['username']) . '"><br>
-                                    <label>Password : </label><input type="text" name="password" value="' . htmlentities($row['password']) . '"><br>
-                                    <label>Telp : </label><input type="text" name="user_telp" value="' . htmlentities($row['user_telp']) . '"><br>
-                                    <label>Email : </label><input type="email" name="email" value="' . htmlentities($row['email']) . '"><br>
-                                    <label>Alamat : </label><input type="text" name="alamat" value="' . htmlentities($row['alamat']) . '"><br>
-                                    <label>isAdmin : </label><input type="text" name="isAdmin" value="' . htmlentities($row['isAdmin']) . '"><br>
+                                    <input type="hidden" name="user_id" value="' . $row['user_id'] . '">
+                                    <label>Username</label><input class="pl-4 mb-4 form-control" type="text" name="username" value="' . htmlentities($row['username']) . '">
+                                    <label>Password</label><input  class="pl-4 mb-4 form-control" type="text" name="password" value="' . htmlentities($row['password']) . '">
+                                    <label>Telp</label><input  class="pl-4 mb-4 form-control" type="text" name="user_telp" value="' . htmlentities($row['user_telp']) . '">
+                                    <label>Email</label><input class="pl-4 mb-4 form-control" type="email" name="email" value="' . htmlentities($row['email']) . '">
+                                    <label>Alamat</label><input class="pl-4 mb-4 form-control" type="text" name="alamat" value="' . htmlentities($row['alamat']) . '">
+                                    <label>IsAdmin</label><input class="pl-4 mb-4 form-control" type="text" name="isAdmin" value="' . htmlentities($row['isAdmin']) . '">
+                                    <div class="flex justify-end">
                                     <input type="submit" class="btn btn-primary" value="Update User">
+                                    </div>
                                 </form>
                             </div>
                         </div>
@@ -266,14 +283,14 @@ session_start();
         <section id="listItem" style="display: none;">
             <div class="mx-3 grid grid-cols-4 gap-3 my-10">
                 <?php
-                // Fetch semua product
-                $stmt = $mysqli->query("SELECT product_id, gambar, nama_product, harga_satuan, deskripsi, stock_product FROM products");
+                // Fetch all products
+                $stmt = $mysqli->query("SELECT product_id, gambar, nama_product, harga_satuan, deskripsi, stock_product, kategori_id FROM products");
 
-                // Check apakah product telah terambil
+                // Check if the query returned results
                 if ($stmt === false) {
                     echo "Error in query: " . $mysqli->error;
                 } else {
-                    // Check apakah ada product
+                    // Check if there are products
                     if ($stmt->num_rows > 0) {
                         while ($row = $stmt->fetch_assoc()) {
                             // Prepare product data
@@ -283,7 +300,8 @@ session_start();
                                 'name' => htmlentities($row['nama_product']),
                                 'price' => htmlentities($row['harga_satuan']),
                                 'description' => htmlentities($row['deskripsi']),
-                                'stock' => htmlentities($row['stock_product'])
+                                'stock' => htmlentities($row['stock_product']),
+                                'kategori_id' => htmlentities($row['kategori_id'])
                             ];
 
                             // Modal ID
@@ -298,11 +316,15 @@ session_start();
                                     <p class="card-text font-bold text-lg text-green-600">Rp. <?= number_format($product['price'], 0, ',', '.'); ?></p>
                                 </div>
                                 <div class="grid grid-cols-2">
-                                    <button class="btn btn-danger mb-4 mr-auto ml-8 hover:text-white" onclick="deleteProduct(<?= $product['id']; ?>)">Delete</button>
-                                    <button class="btn btn-warning mb-4 ml-auto mr-8 hover:text-white" data-bs-toggle="modal" data-bs-target="#<?= $modalId; ?>">Edit</button>
+                                    <!-- Delete Form -->
+                                    <form method="post">
+                                        <input type="hidden" name="delete_product_id" value="<?= $product['id']; ?>">
+                                        <button type="submit" class="btn btn-danger mb-4 mr-auto ml-5 hover:text-white font-semibold">Delete</button>
+                                    </form>
 
+                                    <!-- Edit Button -->
+                                    <button class="btn btn-warning mb-4 ml-auto mr-5 px-4 hover:text-white font-semibold" data-bs-toggle="modal" data-bs-target="#<?= $modalId; ?>">Edit</button>
                                 </div>
-
                             </div>
 
                             <!-- Product Modal -->
@@ -310,27 +332,56 @@ session_start();
                                 <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                                     <div class="modal-content rounded-md shadow-lg">
                                         <div class="modal-header border-b">
-                                            <h5 class="modal-title text-xl font-bold text-gray-800">Product Details</h5>
+                                            <h5 class="modal-title text-xl font-bold text-gray-800">Update Product</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
-                                        <div class="modal-body grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
-                                            <!-- Image Section -->
-                                            <div class="flex justify-center">
-                                                <img class="rounded-lg shadow-md size-fit" src="<?= $product['image']; ?>" alt="Product image">
+                                        <form action="adminPage.php" method="POST">
+                                            <div class="modal-body grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
+                                                <!-- Image Section -->
+                                                <div class="justify-center">
+                                                    <img class="rounded-lg shadow-md" src="<?= $product['image']; ?>" alt="Product image">
+                                                    <div class="pt-4">
+                                                        <label>Link Gambar</label>
+                                                        <textarea class="pl-4 form-control" type="text" rows="5" name="gambar"><?= htmlspecialchars($product['image']) ?></textarea>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Details Section -->
+                                                <div class="">
+                                                    <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
+
+                                                    <label>Nama Product</label>
+                                                    <input class="pl-4 form-control" type="text" name="nama_product" value="<?= $product['name'] ?>"><br>
+
+                                                    <label>Harga Satuan</label>
+                                                    <input class="pl-4 form-control" type="text" name="harga_satuan" value="<?= $product['price'] ?>"><br>
+
+                                                    <label>Deskripsi Product</label>
+                                                    <input class="pl-4 form-control" type="text" name="deskripsi" value="<?= $product['description'] ?>"><br>
+
+                                                    <label>Stock Product</label>
+                                                    <input class="pl-4 form-control" type="text" name="stock_product" value="<?= $product['stock'] ?>"><br>
+
+                                                    <!-- Category Dropdown -->
+                                                    <div class="flex items-center pr-3 mb-3">
+                                                        <label class="font-medium text-gray-600 mr-4" for="kategori">Kategori: </label>
+                                                        <select id="aaa" name="aaa" class="border-none bg-transparent rounded-lg focus:outline-none text-gray-700">
+                                                            <?php
+                                                            $kategoriStmt = $mysqli->query("SELECT kategori_id, nama_kategori FROM kategori");
+                                                            while ($row = $kategoriStmt->fetch_assoc()) {
+                                                                $selected = ($product['kategori_id'] == $row['kategori_id']) ? 'selected' : '';
+                                                                echo '<option value="' . htmlentities($row['kategori_id']) . '" ' . $selected . '>' . htmlentities($row['nama_kategori']) . '</option>';
+                                                            }
+                                                            ?>
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="flex justify-end">
+                                                        <input type="submit" class="btn btn-primary" value="Update Product">
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <!-- Details Section -->
-                                            <div class="space-y-3">
-                                                <form action="adminPage.php" method="POST">
-                                                    <input type="hidden" name="product_id" value="<?= $product['id'] ?>"><br>
-                                                    <label>alamat gambar : </label><input type="text" name="gambar" value="<?= $product['image'] ?>"><br>
-                                                    <label>nama product : </label><input type="text" name="nama_product" value="<?= $product['name'] ?>"><br>
-                                                    <label>harga satuan : </label><input type="text" name="harga_satuan" value="<?= $product['price'] ?>"><br>
-                                                    <label>deskripsi product : </label><input type="text" name="deskripsi" value="<?= $product['description'] ?>"><br>
-                                                    <label>stock product : </label><input type="text" name="stock_product" value="<?= $product['stock'] ?>"><br>
-                                                    <input type="submit" class="btn btn-primary" value="Update Product">
-                                                </form>
-                                            </div>
-                                        </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -338,26 +389,27 @@ session_start();
                 <?php
                         }
                     } else {
-                        // jika no product
+                        // No products found
                         echo "No products available.";
                     }
                 }
 
-                // update data ke database
-                if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id'])) {
+                // Update Product in the database
+                if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id']) && !isset($_POST['delete_product_id'])) {
                     $id = $_POST['product_id'];
                     $gambar = $_POST['gambar'];
                     $nama_product = $_POST['nama_product'];
                     $harga_satuan = $_POST['harga_satuan'];
                     $deskripsi = $_POST['deskripsi'];
                     $stock_product = $_POST['stock_product'];
+                    $kategori_id = $_POST['aaa'];
 
-                    // Prepare query
-                    $sql = "UPDATE products SET gambar=?, nama_product=?, harga_satuan=?, deskripsi=?, stock_product=? WHERE product_id=?";
+                    // Prepare query to update product
+                    $sql = "UPDATE products SET gambar=?, nama_product=?, harga_satuan=?, deskripsi=?, stock_product=?, kategori_id=? WHERE product_id=?";
                     $stmt = $mysqli->prepare($sql);
-                    $stmt->bind_param("ssisii", $gambar, $nama_product, $harga_satuan, $deskripsi, $stock_product, $id);
+                    $stmt->bind_param("ssisiii", $gambar, $nama_product, $harga_satuan, $deskripsi, $stock_product, $kategori_id, $id);
 
-                    // Execute query
+                    // Execute the query
                     if ($stmt->execute()) {
                         echo "<script>alert('Product updated successfully!');</script>";
                     } else {
@@ -367,24 +419,22 @@ session_start();
                     echo '<meta http-equiv="refresh" content="0">';
                 }
 
-                // set delete  ke product
-                if (isset($_GET['deleteProduct'])) {
-                    $ProductId = $_GET['deleteProduct'];
+                // Delete Product
+                if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_product_id'])) {
+                    $productId = $_POST['delete_product_id'];
 
-                    // Delete user
+                    // Prepare and execute the delete query
                     $stmt = $mysqli->prepare("DELETE FROM products WHERE product_id = ?");
-                    $stmt->bind_param("i", $ProductId);
-                    $stmt->execute();
+                    $stmt->bind_param("i", $productId);
+                    if ($stmt->execute()) {
+                        echo "<script>alert('Product deleted successfully!');</script>";
+                    } else {
+                        echo "Error deleting product: " . $stmt->error;
+                    }
+                    $stmt->close();
+                    echo '<meta http-equiv="refresh" content="0">';
                 }
                 ?>
-                <script>
-                    function deleteProduct(ProductId) {
-                        // alert sebelum delete
-                        if (confirm("Are you sure you want to delete this product?")) {
-                            window.location.href = "adminPage.php?deleteProduct=" + ProductId;
-                        }
-                    }
-                </script>
             </div>
         </section>
 

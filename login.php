@@ -25,6 +25,52 @@ session_start();
 
 </head>
 
+<?php
+// status belum berhasil login
+$loginFail = 0;
+$isAdmin = 0;
+
+// POST login
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_POST['name']) && !empty($_POST['pass'])) {
+    // Untuk check semua pasangan username dan password
+    $result = $mysqli->query("SELECT user_id,username,password,isAdmin FROM users");
+    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+
+        // check pasangan username dan password
+        if ($_POST['name'] == $row['username'] && $_POST['pass'] == $row['password']) {
+
+            // supaya  user_id di page lain
+            $_SESSION['user_id'] = $row['user_id'];
+
+            if ($row['isAdmin'] == '1') {
+                // admin
+                $_SESSION['isAdmin'] = 1;
+                header('Location: adminPage.php');
+            } else {
+                // user biasa
+                $_SESSION['isAdmin'] = 0;
+                header('Location: home.php');
+            }
+            break;
+        } else {
+            // sebagai status fail login
+            $loginFail = 1;
+        }
+    }
+}
+
+// POST new account
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['newUsername']) && isset($_POST['newPassword']) && isset($_POST['newTelpon']) && isset($_POST['newEmail']) && isset($_POST['newAlamat'])) {
+    $sql = "INSERT INTO users (username,password,user_telp,email,alamat,isAdmin) VALUES (?,?,?,?,?,0)";
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param("sssss", $_POST['newUsername'], $_POST['newPassword'], $_POST['newTelpon'], $_POST['newEmail'], $_POST['newAlamat']);
+    $stmt->execute();
+
+    // refresh page
+    echo '<meta http-equiv="refresh" content="0">';
+}
+?>
+
 <body>
     <section class="p-10 grid grid-cols-2 gap-10 place-items-center">
         <div>
@@ -37,65 +83,29 @@ session_start();
                     <p class="text-5xl font-bold">Log In</p>
                 </div>
 
+                <?php
+                if ($loginFail == 1) {
+                    echo '<div class="alert alert-danger">Login Failed</div>';
+                }
+                ?>
+
                 <!-- Login Username -->
                 <div class="form-group">
                     <label class="pb-1" for="usernameInput">Username</label>
-                    <input class="form-control" name="name" id="usernameInput" placeholder="Enter Username">
+                    <input class="form-control" name="name" id="usernameInput" placeholder="Enter Username" required>
                 </div>
 
 
                 <div class="form-group">
                     <label class="pb-1" for="passwordInput">Password</label>
-                    <input type="password" class="form-control" name="pass" id="passwordInput" placeholder="Enter Password">
+                    <input type="password" class="form-control" name="pass" id="passwordInput" placeholder="Enter Password" required>
                 </div>
 
                 <div>
                     <div>
-                        <button type="submit" class="size-full btn btn-primary">LOG IN</button>
+                        <button type="submit" class="size-full btn btn-primary font-semibold">LOG IN</button>
                     </div>
             </form>
-
-            <?php
-            // status belum berhasil login
-            $login = 0;
-
-            if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_POST['name']) && !empty($_POST['pass'])) {
-
-                $result = $mysqli->query("SELECT user_id,username,password,isAdmin FROM users");
-                // Untuk check semua pasangan username dan password
-                while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
-
-                    // check pasangan username dan password
-                    if ($_POST['name'] == $row['username'] && $_POST['pass'] == $row['password']) {
-                        // status berhasil login
-                        $login = 1;
-
-                        // check apakah user adalah admin
-                        if ($row['isAdmin'] == '1') {
-                            $_SESSION['isAdmin'] = 1;
-                        } else {
-                            $_SESSION['isAdmin'] = 0;
-                        }
-
-                        // supaya bisa mengecek user id di page lain
-                        $_SESSION['user_id'] = $row['user_id'];
-
-                        break;
-                    }
-                }
-
-                if ($login == 0) {
-                    echo '<div class="alert alert-danger">Login Failed</div>';
-                } else if ($isAdmin == 1) {
-
-                    echo '<div class="alert alert-success">Welcome Admin</div>';
-                    header('Location: adminPage.php');
-                } else if ($login == 1) {
-                    echo '<div class="alert alert-success">Login Success</div>';
-                    header('Location: home.php');
-                }
-            }
-            ?>
 
             <!-- Create new account MODAL -->
             <p class="mt-1">Create <a class="link-underline text-blue-600" href="" data-bs-toggle="modal" data-bs-target="#createAccountModal">New Account?</a></p>
@@ -105,7 +115,7 @@ session_start();
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="myLargeModalLabel">Daftar</h5>
+                            <h5 class="modal-title text-xl font-bold" id="myLargeModalLabel">Daftar</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
 
@@ -130,23 +140,13 @@ session_start();
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="newAlamat">Alamat</label>
-                                    <textarea class="form-control" id="newAlamat" name="newAlamat" rows="3" placeholder="Enter Alamat" required></textarea>
+                                    <input class="form-control" id="newAlamat" name="newAlamat" placeholder="Enter Alamat" required></input>
                                 </div>
-                                <button type="submit" class="btn btn-primary">Create Account</button>
+                                <div class="flex justify-end">
+                                    <button type="submit" class="btn btn-primary font-semibold">Create Account</button>
+                                </div>
                             </form>
                         </div>
-
-                        <?php
-                        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['newUsername']) && isset($_POST['newPassword']) && isset($_POST['newTelpon']) && isset($_POST['newEmail']) && isset($_POST['newAlamat'])) {
-                            $sql = "INSERT INTO users (username,password,user_telp,email,alamat,isAdmin) VALUES (?,?,?,?,?,0)";
-                            $stmt = $mysqli->prepare($sql);
-                            $stmt->bind_param("sssss", $_POST['newUsername'], $_POST['newPassword'], $_POST['newTelpon'], $_POST['newEmail'], $_POST['newAlamat']);
-                            $stmt->execute();
-
-                            // refresh page
-                            echo '<meta http-equiv="refresh" content="0">';
-                        }
-                        ?>
                     </div>
                 </div>
             </div>

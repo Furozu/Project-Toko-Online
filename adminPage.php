@@ -280,6 +280,8 @@ session_start();
                                                 <input type="hidden" name="action" value="hide">
                                                 <button type="submit" class="btn btn-danger mb-4 mr-auto ml-5 px-4 hover:text-white font-semibold">Hide</button>
                                             </form>
+                                        <?php elseif ($product['stock'] == 0) : ?>
+                                            <p class="bg-danger rounded mb-4 mr-auto ml-5 px-4 py-2 text-sm text-white font-semibold text-center">Add Stock to Show</p>
                                         <?php endif; ?>
                                     </div>
 

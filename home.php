@@ -186,7 +186,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == "addToCart"
                     $updateCart->bind_param("ii", $quantity, $row['detail_id']);
                     $updateCart->execute();
                 }
-            } else {
+            } else if ($quantity != 0) {
 
                 // Kalo product blm ada di checkout user
                 $insertStmt = $mysqli->prepare("INSERT INTO detailcheckout (checkout_id, product_id, jumlah_product) VALUES (?, ?, ?)");

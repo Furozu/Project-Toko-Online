@@ -92,7 +92,7 @@ session_start();
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="newHarga">Harga Satuan</label>
-                                    <input type="number" class="form-control" id="newHarga" name="newHarga" placeholder="Enter Harga Satuan" required min="0">
+                                    <input type="number" class="form-control" id="newHarga" name="newHarga" placeholder="Enter Harga Satuan" required min="0" max="999999">
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="newDeskripsi">Deskripsi</label>
@@ -100,7 +100,7 @@ session_start();
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="newStock">Stock</label>
-                                    <input type="number" class="form-control" id="newStock" name="newStock" placeholder="Enter Stock" required min="0">
+                                    <input type="number" class="form-control" id="newStock" name="newStock" placeholder="Enter Stock" required min="0" max="999999">
                                 </div>
                                 <div class="flex items-center pr-3 mb-3">
                                     <label class="font-medium text-gray-600 mr-4" for="kategori">Kategori : </label>
@@ -315,13 +315,13 @@ session_start();
                                                     <input class="pl-4 form-control" type="text" name="nama_product" value="<?= $product['name'] ?>"><br>
 
                                                     <label>Harga Satuan</label>
-                                                    <input class="pl-4 form-control" type="number" name="harga_satuan" value="<?= $product['price'] ?>" min="0"><br>
+                                                    <input class="pl-4 form-control" type="number" name="harga_satuan" value="<?= $product['price'] ?>" min="0" max="999999"><br>
 
                                                     <label>Deskripsi Product</label>
                                                     <input class="pl-4 form-control" type="text" name="deskripsi" value="<?= $product['description'] ?>"><br>
 
                                                     <label>Stock Product</label>
-                                                    <input class="pl-4 form-control" type="number" name="stock_product" value="<?= $product['stock'] ?>" min="0"><br>
+                                                    <input class="pl-4 form-control" type="number" name="stock_product" value="<?= $product['stock'] ?>" min="0" max="999999"><br>
 
                                                     <!-- Category Dropdown -->
                                                     <div class="flex items-center pr-3 mb-3">

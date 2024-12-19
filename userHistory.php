@@ -37,7 +37,7 @@ session_start();
                 <table class="table-auto w-full text-sm text-left border border-gray-300 shadow-lg rounded-lg">
                     <thead class="bg-gradient-to-r from-gray-600 to-black text-yellow-400 text-center">
                         <tr>
-                            <th class="px-2 py-3">Date of Payment</th>
+                            <th class="px-2 py-3">Date</th>
                             <th class="px-4 py-3 text-left">Items</th>
                             <th class="px-5 py-3">Total Price</th>
                             <th class="px-4 py-3">Payment Type</th>
@@ -79,12 +79,19 @@ session_start();
                                         $stmt_detail->bind_param("i", $checkout['id']);
                                         $stmt_detail->execute();
                                         $result_detail = $stmt_detail->get_result();
+                                        $haveItem = 0;
 
                                         // display item info nya
                                         while ($row_detail = $result_detail->fetch_assoc()) {
+                                            $haveItem = 1;
                                             $totalSatuan = $row_detail['jumlah_product'] * $row_detail['harga_satuan'];
                                             echo '<li>' . $row_detail['nama_product'] . ' (' . $row_detail['jumlah_product'] . ' x Rp. ' . number_format($row_detail['harga_satuan'], 0, ',', '.') . ') = Rp. ' . number_format($totalSatuan, 0, ',', '.') . '</li>';
                                         }
+
+                                        if ($haveItem == 0) {
+                                            echo '-';
+                                        }
+
                                         ?>
 
                                     </ul>

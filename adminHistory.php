@@ -40,8 +40,8 @@ session_start();
                 <table class="table-auto w-full text-sm text-left border border-gray-300 shadow-lg rounded-lg">
                     <thead class="bg-gradient-to-r from-gray-600 to-black text-yellow-400 text-center">
                         <tr>
-                            <th class="px-4 py-3">#</th>
-                            <th class="px-2 py-3">Date of Payment</th>
+                            <th class="px-4 py-3">Transaction ID</th>
+                            <th class="px-2 py-3">Date</th>
                             <th class="px-4 py-3">User ID</th>
                             <th class="px-4 py-3">Username</th>
                             <th class="px-4 py-3 text-left">Items</th>

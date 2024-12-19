@@ -196,10 +196,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == "addToCart"
                 $stock = 0 - $quantity;
             }
 
-            // Update Stock product
-            $updateStock2 = $mysqli->prepare("UPDATE products SET stock_product = stock_product + ? WHERE product_id = ?");
-            $updateStock2->bind_param("ii", $stock, $_POST['product_id']);
-            $updateStock2->execute();
+            if ($quantityBef != 0) {
+                // Update Stock product
+                $updateStock2 = $mysqli->prepare("UPDATE products SET stock_product = stock_product + ? WHERE product_id = ?");
+                $updateStock2->bind_param("ii", $stock, $_POST['product_id']);
+                $updateStock2->execute();
+            }
+
 
             // refresh page
             echo '<meta http-equiv="refresh" content="0">';

@@ -419,8 +419,6 @@ session_start();
                 ?>
             </div>
         </section>
-
-        <br><br><br><br><br><br><br><br><br><br><br>
 </body>
 
 </html>

@@ -504,7 +504,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' 
                                     $checkQuatity->bind_param("ii", $_SESSION['checkout_id'], $product['id']);
                                     $checkQuatity->execute();
                                     $checkResult = $checkQuatity->get_result();
-                                    if ($row = $checkResult->fetch_assoc()) {
+                                    if ($row = $checkResult->fetch_assoc() and isset($_SESSION['checkout_id'])) {
                                         // kalo ada item di cart
                                         echo '<p id="quantity-' . $product['id'] . '" name="quantity-' . $product['id'] . '" class="text-center quantity-display">' . $row['jumlah_product'] . '</p>';
                                     } else {

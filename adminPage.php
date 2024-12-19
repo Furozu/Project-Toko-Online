@@ -84,7 +84,7 @@ session_start();
                             <form method="post">
                                 <div class="form-group mb-3">
                                     <label for="newImage">Link Gambar</label>
-                                    <input type="text" class="form-control" id="newImage" name="newImage" placeholder="Enter Image Address" required>
+                                    <input type="url" class="form-control" id="newImage" name="newImage" placeholder="Enter Image Address" required>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="newBarang">Nama barang</label>
@@ -92,7 +92,7 @@ session_start();
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="newHarga">Harga Satuan</label>
-                                    <input type="text" class="form-control" id="newHarga" name="newHarga" placeholder="Enter Harga Satuan" required>
+                                    <input type="number" class="form-control" id="newHarga" name="newHarga" placeholder="Enter Harga Satuan" required min="0">
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="newDeskripsi">Deskripsi</label>
@@ -100,7 +100,7 @@ session_start();
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="newStock">Stock</label>
-                                    <input type="text" class="form-control" id="newStock" name="newStock" placeholder="Enter Stock" required>
+                                    <input type="number" class="form-control" id="newStock" name="newStock" placeholder="Enter Stock" required min="0">
                                 </div>
                                 <div class="flex items-center pr-3 mb-3">
                                     <label class="font-medium text-gray-600 mr-4" for="kategori">Kategori : </label>
@@ -274,11 +274,11 @@ session_start();
                                 <div class="grid grid-cols-2">
                                     <div id="product_<?= $product['id']; ?>" class="product-item">
                                         <?php if ($product['stock'] > 0): ?>
-                                            <!-- If the product is visible, show Hide button -->
+                                            <!--  jika stock ada, show Hide button -->
                                             <form method="post">
                                                 <input type="hidden" name="product_id" value="<?= $product['id']; ?>">
                                                 <input type="hidden" name="action" value="hide">
-                                                <button type="submit" class="btn btn-danger">Hide</button>
+                                                <button type="submit" class="btn btn-danger mb-4 mr-auto ml-5 px-4 hover:text-white font-semibold">Hide</button>
                                             </form>
                                         <?php endif; ?>
                                     </div>
@@ -303,7 +303,7 @@ session_start();
                                                     <img class="rounded-lg shadow-md" src="<?= $product['image']; ?>" alt="Product image">
                                                     <div class="pt-4">
                                                         <label>Link Gambar</label>
-                                                        <textarea class="pl-4 form-control" type="text" rows="5" name="gambar"><?= htmlspecialchars($product['image']) ?></textarea>
+                                                        <textarea class="pl-4 form-control" type="url" rows="5" name="gambar"><?= htmlspecialchars($product['image']) ?></textarea>
                                                     </div>
                                                 </div>
 
@@ -315,13 +315,13 @@ session_start();
                                                     <input class="pl-4 form-control" type="text" name="nama_product" value="<?= $product['name'] ?>"><br>
 
                                                     <label>Harga Satuan</label>
-                                                    <input class="pl-4 form-control" type="text" name="harga_satuan" value="<?= $product['price'] ?>"><br>
+                                                    <input class="pl-4 form-control" type="number" name="harga_satuan" value="<?= $product['price'] ?>" min="0"><br>
 
                                                     <label>Deskripsi Product</label>
                                                     <input class="pl-4 form-control" type="text" name="deskripsi" value="<?= $product['description'] ?>"><br>
 
                                                     <label>Stock Product</label>
-                                                    <input class="pl-4 form-control" type="text" name="stock_product" value="<?= $product['stock'] ?>"><br>
+                                                    <input class="pl-4 form-control" type="number" name="stock_product" value="<?= $product['stock'] ?>" min="0"><br>
 
                                                     <!-- Category Dropdown -->
                                                     <div class="flex items-center pr-3 mb-3">
@@ -355,9 +355,9 @@ session_start();
                     }
                 }
 
-                // Handle POST actions (product update and hide)
+                // post handling (product update and hide)
                 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                    // Update product logic
+                    // Update product
                     if (isset($_POST['product_id']) && !isset($_POST['action'])) {
                         $id = $_POST['product_id'];
                         $gambar = $_POST['gambar'];
@@ -367,12 +367,12 @@ session_start();
                         $stock_product = $_POST['stock_product'];
                         $kategori_id = $_POST['kategori_id'];
 
-                        // Prepare query to update product
+                        // query update product
                         $sql = "UPDATE products SET gambar=?, nama_product=?, harga_satuan=?, deskripsi=?, stock_product=?, kategori_id=? WHERE product_id=?";
                         $stmt = $mysqli->prepare($sql);
                         $stmt->bind_param("ssisiii", $gambar, $nama_product, $harga_satuan, $deskripsi, $stock_product, $kategori_id, $id);
 
-                        // Execute the query
+                        // Execute
                         if ($stmt->execute()) {
                             echo "<script>alert('Product updated successfully!');</script>";
                         } else {
@@ -382,19 +382,18 @@ session_start();
                         echo '<meta http-equiv="refresh" content="0">';
                     }
 
-                    // Hide product logic
+                    // Hide product
                     if (isset($_POST['product_id']) && isset($_POST['action']) && $_POST['action'] === 'hide') {
                         $productId = $_POST['product_id'];
 
-                        // Hide product by setting stock to 0
+                        // stock jadikan 0
                         $sql = "UPDATE products SET stock_product = 0 WHERE product_id = ?";
                         $stmt = $mysqli->prepare($sql);
                         $stmt->bind_param('i', $productId);
 
-                        // Execute the query and check for success
+                        // Execute
                         if ($stmt->execute()) {
                             echo '<script>alert("Product has been hidden.");</script>';
-                            echo '<script>window.location.href = window.location.href;</script>';  // Refresh the page to reflect the changes
                         } else {
                             echo '<script>alert("Error hiding the product: ' . $stmt->error . '");</script>';
                         }

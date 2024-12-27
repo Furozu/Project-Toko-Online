@@ -2,6 +2,7 @@
 require_once "connect.php";
 session_start();
 
+
 $where = '';
 $setKategori = '';
 $and = '';
@@ -129,26 +130,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName'])) {
 
         // Kategori output
         if ($_POST['kategori'] != "All") {
-            $setKategori = "kategori_id = " . $_POST['kategori'];
+            $setKategori = " AND kategori_id = " . $_POST['kategori'];
         } else {
             $setKategori = '';
         }
 
         // Search Bar output
         if ($_POST['searchBar'] != "") {
-            $setSearch = "nama_product LIKE '%" . $_POST['searchBar'] . "%'";
+            $setSearch = " AND nama_product LIKE '%" . $_POST['searchBar'] . "%'";
         } else {
             $setSearch = '';
-        }
-
-        // WHERE
-        if ($setKategori != '' || $setSearch != '') {
-            $where = " WHERE ";
-        }
-
-        // AND
-        if ($setKategori != '' && $setSearch != '') {
-            $and = " AND ";
         }
     }
 }
@@ -159,54 +150,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == "addToCart"
     if (isset($_POST['hidden-quantity-' . $_POST['product_id']])) {
         $quantity = (int)$_POST['hidden-quantity-' . $_POST['product_id']];
 
-        if ($quantity >= 0) {
-            // Check if the product already exists in the cart (detailcheckout)
-            $checkCart = $mysqli->prepare("SELECT d.detail_id, d.jumlah_product, p.stock_product 
+        // Check if the product already exists in the cart (detailcheckout)
+        $checkCart = $mysqli->prepare("SELECT d.detail_id, d.jumlah_product, p.stock_product 
                                             FROM detailcheckout d 
                                             JOIN products p ON d.product_id = p.product_id 
                                             WHERE d.checkout_id = ? AND d.product_id = ?");
-            $checkCart->bind_param("ii", $_SESSION['checkout_id'], $_POST['product_id']);
-            $checkCart->execute();
-            $checkResult = $checkCart->get_result();
+        $checkCart->bind_param("ii", $_SESSION['checkout_id'], $_POST['product_id']);
+        $checkCart->execute();
+        $checkResult = $checkCart->get_result();
 
-            if ($row = $checkResult->fetch_assoc()) {
-                // Kalo product sudah ada di checkout user
-                $quantityBef = $row['jumlah_product'];
-                $stock = $quantityBef - $quantity;
+        if ($row = $checkResult->fetch_assoc()) {
+            // Kalo product sudah ada di checkout user
+            $quantityBef = $row['jumlah_product'];
 
+            // quantity sebelum dan sekarang tidak boleh sama
+            if ($quantity != null and $quantity != $quantityBef) {
                 if ($quantity == 0) {
                     // kalo 0 hilang dari cart
-                    $sql = "DELETE FROM detailCheckout WHERE detail_id = ? ";
-                    $deleteQuery2 = $mysqli->prepare($sql);
+                    $deleteQuery2 = $mysqli->prepare("DELETE FROM detailCheckout WHERE detail_id = ?");
                     $deleteQuery2->bind_param("i", $row['detail_id']);
                     $deleteQuery2->execute();
-                } else {
+                } else if ($quantity > 0) {
                     // quantity bukan 0 
                     $updateCart = $mysqli->prepare("UPDATE detailcheckout SET jumlah_product = ? WHERE detail_id = ?");
                     $updateCart->bind_param("ii", $quantity, $row['detail_id']);
                     $updateCart->execute();
                 }
-            } else if ($quantity != 0) {
-
-                // Kalo product blm ada di checkout user
-                $insertStmt = $mysqli->prepare("INSERT INTO detailcheckout (checkout_id, product_id, jumlah_product) VALUES (?, ?, ?)");
-                $insertStmt->bind_param("iii", $_SESSION['checkout_id'], $_POST['product_id'], $quantity);
-                $insertStmt->execute();
-
-                $stock = 0 - $quantity;
             }
-
-            if ($quantityBef != 0) {
-                // Update Stock product
-                $updateStock2 = $mysqli->prepare("UPDATE products SET stock_product = stock_product + ? WHERE product_id = ?");
-                $updateStock2->bind_param("ii", $stock, $_POST['product_id']);
-                $updateStock2->execute();
-            }
-
-
-            // refresh page
-            echo '<meta http-equiv="refresh" content="0">';
+        } else if ($quantity != 0) {
+            // Kalo product blm ada di checkout user
+            $insertStmt = $mysqli->prepare("INSERT INTO detailcheckout (checkout_id, product_id, jumlah_product) VALUES (?, ?, ?)");
+            $insertStmt->bind_param("iii", $_SESSION['checkout_id'], $_POST['product_id'], $quantity);
+            $insertStmt->execute();
         }
+
+        // refresh page
+        echo '<meta http-equiv="refresh" content="0">';
     }
 }
 
@@ -220,11 +199,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName'])) {
         $deleteQuery->bind_param("i", $_POST['detailID']);
         $deleteQuery->execute();
 
-        // update stock
-        $stockNow = $_POST['jumProduct'] + $_POST['stock'];
-        $updateStock = $mysqli->prepare("UPDATE products SET stock_product = ? WHERE product_id = ?");
-        $updateStock->bind_param("ii", $stockNow, $_POST['productID']);
-        $updateStock->execute();
+        // update stock (not used)
+        // $stockNow = $_POST['jumProduct'] + $_POST['stock'];
+        // $updateStock2 = $mysqli->prepare("UPDATE products SET stock_product = ? WHERE product_id = ?");
+        // $updateStock2->bind_param("ii", $stockNow, $_POST['productID']);
+        // $updateStock2->execute();
 
         // refresh page
         echo '<meta http-equiv="refresh" content="0">';
@@ -233,7 +212,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName'])) {
 
 // Checkout function (completed transaction)
 if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' and isset($_POST['payment']) and isset($_POST['haveItem'])) {
-    if ($_POST['payment'] != 0 and $_POST['haveItem'] == TRUE) {
+    // TODO: check ada item yang out of order
+
+
+    if ($_POST['payment'] != 0 and $_POST['haveItem'] == TRUE and $_POST['availability'] == TRUE) {
+
+        // get the checkout item
+        $stmt = $mysqli->prepare("SELECT d.detail_id, p.product_id, d.jumlah_product, p.stock_product
+                                    FROM detailcheckout d 
+                                    JOIN products p ON d.product_id = p.product_id 
+                                    WHERE d.checkout_id = ?");
+        $stmt->bind_param("i",  $_SESSION['checkout_id']);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            // Update Stock product
+            $updateStock = $mysqli->prepare("UPDATE products SET stock_product = ? WHERE product_id = ?");
+            $newStock = $row['stock_product'] - $row['jumlah_product'];
+            $updateStock->bind_param("ii", $newStock, $row['product_id']);
+            $updateStock->execute();
+        }
+
+        // status Completed maker
         $sql = "UPDATE checkout SET date = ?, payment_id = ?, status = 'Completed' WHERE checkout_id = ?";
         $checkoutQuery = $mysqli->prepare($sql);
         $payment_id = $_POST['payment'];
@@ -253,30 +253,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' 
         <a class="navbar-brand pl-12 text-yellow-400 hover:text-white hover:font-semibold" href="home.php">Toko Online</a>
         <div class="navbar justify-content-between">
             <ul class="navbar-nav mr-auto gap-3">
-                <li class="nav-item">
-                    <a class="nav-link text-yellow-400 hover:text-white hover:font-semibold" href="profil.php">Profile</a>
-                </li>
 
                 <?php
-                // User Only
-                if ($_SESSION['isAdmin'] == 0) {
+                if (isset($_SESSION['user_id'])) {
                     echo '<li class="nav-item">
+                            <a class="nav-link text-yellow-400 hover:text-white hover:font-semibold" href="profil.php">Profile</a>
+                          </li>';
+
+                    // User Only
+                    if ($_SESSION['isAdmin'] == 0) {
+                        echo '<li class="nav-item">
                             <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="userHistory.php">History</a>
                           </li>';
-                }
+                    }
                 ?>
 
+                    <?php
+                    // Admin Only
+                    if ($_SESSION['isAdmin'] == 1) {
+                    ?>
+                        <li class="nav-item">
+                            <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="adminPage.php">Admin</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="adminHistory.php">Admin History</a>
+                        </li>
                 <?php
-                // Admin Only
-                if ($_SESSION['isAdmin'] == 1) {
-                ?>
-                    <li class="nav-item">
-                        <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="adminPage.php">Admin</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-yellow-500 hover:text-white hover:font-semibold" href="adminHistory.php">Admin History</a>
-                    </li>
-                <?php
+                    }
                 }
                 ?>
 
@@ -285,7 +288,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' 
 
         <?php
         // User Only
-        if ($_SESSION['isAdmin'] == 0) {
+        if (!isset($_SESSION['user_id'])) {
+            echo '<a href="login.php" type="button" class="hover:text-white btn btn-primary  font-semibold  px-5 py-2 rounded-lg text-sm ml-auto mr-14">Login</a>';
+        }
+        if (isset($_SESSION['user_id']) and $_SESSION['isAdmin'] == 0) {
             echo '<button type="button" class="hover:text-white bg-yellow-400  font-semibold  px-5 py-2 rounded-lg text-sm ml-auto mr-14" data-bs-toggle="modal" data-bs-target="#checkout">Cart</button>';
         }
         ?>
@@ -314,35 +320,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' 
 
                     // kalau tidak ada item
                     $haveItem = FALSE;
+                    $available = TRUE;
 
                     // kalo ada item
                     while ($row = $result->fetch_assoc()) {
                         $haveItem = TRUE;
                     ?>
-                        <div class="bg-gray-200 rounded-lg p-2 m-2">
-                            <div class="grid grid-cols-3 items-center">
+                        <div class="bg-gray-100 rounded-lg p-2 m-2 shadow-md">
+                            <div class="grid grid-cols-3 items-center pl-2">
                                 <!-- Product Name -->
-                                <p class="mb-0 text-gray-800 font-medium"><?= $row['nama_product']; ?></p>
+                                <p class="text-gray-800 font-semibold text-lg"><?= $row['nama_product']; ?></p>
 
-                                <!-- Quantity (centered) -->
-                                <p class="mb-0 text-center text-gray-600 font-medium"><?= $row['jumlah_product']; ?></p>
+                                <!-- Quantity and Availability -->
+                                <div class="flex justify-between">
+                                    <p class="text-gray-600 font-medium">Quantity: <?= $row['jumlah_product']; ?></p>
+                                    <?php if ($row['stock_product'] < $row['jumlah_product']): ?>
+                                        <p class="text-red-500 font-semibold">Not Available!</p>
+                                        <?php $available = FALSE; ?>
+                                    <?php endif; ?>
+                                </div>
 
-                                <!-- Close Button (right-aligned) -->
-                                <form method="POST">
-                                    <div class="justify-self-end">
-
-                                        <!-- data untuk post nanti -->
-                                        <input type="hidden" name="actionName" value="delete">
-                                        <input type="hidden" name="detailID" value="<?= $row['detail_id'] ?>">
-                                        <input type="hidden" name="stock" value="<?= $row['stock_product'] ?>">
-                                        <input type="hidden" name="jumProduct" value="<?= $row['jumlah_product'] ?>">
-                                        <input type="hidden" name="productID" value="<?= $row['product_id'] ?>">
-                                        <button type="submit" class="btn-close"></button>
-                                    </div>
+                                <!-- Close Button -->
+                                <form method="POST" class="ml-auto">
+                                    <input type="hidden" name="actionName" value="delete">
+                                    <input type="hidden" name="detailID" value="<?= $row['detail_id'] ?>">
+                                    <input type="hidden" name="stock" value="<?= $row['stock_product'] ?>">
+                                    <input type="hidden" name="jumProduct" value="<?= $row['jumlah_product'] ?>">
+                                    <input type="hidden" name="productID" value="<?= $row['product_id'] ?>">
+                                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded shadow">Remove</button>
                                 </form>
-
                             </div>
                         </div>
+
                     <?php
                     }
 
@@ -365,6 +374,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' 
                     <form method="POST">
                         <input type="hidden" name="actionName" value="checkout">
                         <input type="hidden" name="haveItem" value="<?= $haveItem ?>">
+                        <input type="hidden" name="availability" value="<?= $available ?>">
 
                         <!-- Payment Method Selection -->
                         <div class="flex items-center space-x-2 mt-2 mb-3 mx-2">
@@ -386,7 +396,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' 
                         <!-- Checkout Button -->
                         <div class="modal-footer border-t px-4 py-3">
 
-                            <button type="submit" class="btn btn-primary px-5 py-2 rounded-lg text-sm">Checkout</button>
+                            <?php
+                            // ada yg diluar stock / no item in cart
+                            if ($available == FALSE or $haveItem == FALSE) { ?>
+                                <div class="bg-yellow-100 border-l-4 px-3 py-2 border-yellow-500 text-yellow-700 rounded-lg">
+                                    <p class="text-sm font-semibold">
+                                        <?= $available == FALSE ? 'Ada Item Melebihi Stock' : 'No Item in Cart'; ?>
+                                    </p>
+                                </div>
+                                <button type="submit" class="btn btn-primary px-5 py-2 rounded-lg text-sm disabled">Checkout</button>
+
+                            <?php } else { ?>
+                                <!-- tidak ada masalah -->
+                                <button type="submit" class="btn btn-primary px-5 py-2 rounded-lg text-sm">Checkout</button>
+                            <?php }  ?>
+
                         </div>
                     </form>
 
@@ -435,11 +459,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' 
 
     <!-- item list  -->
     <div class=" m-3 grid grid-cols-4 gap-3">
-
         <?php
-
         $result = $mysqli->query("SELECT product_id, gambar, nama_product, harga_satuan, deskripsi, stock_product 
-                                FROM products " . $where .  $setKategori . $and . $setSearch);
+                                FROM products WHERE stock_product != 0" .  $setKategori . $setSearch);
         while ($row = $result->fetch_assoc()) {
 
             // product element
@@ -498,7 +520,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' 
                                 <div class="grid grid-cols-3 items-center">
 
                                     <!-- "-" Button , "javascript:void(0);" supaya page nya tidak refresh -->
-                                    <a href="javascript:void(0);" class="btn btn-danger text-center size-10 minus-btn <?= $_SESSION['isAdmin'] == 1 ? 'disabled' : '' ?>" data-id="<?= $product['id'] ?>">-</a>
+                                    <a href="javascript:void(0);" class="btn btn-danger text-center size-10 minus-btn <?= (!isset($_SESSION['user_id']) || (isset($_SESSION['isAdmin']) && $_SESSION['isAdmin'] == 1)) ? 'disabled' : '' ?>" <?= (!isset($_SESSION['user_id']) || (isset($_SESSION['isAdmin']) && $_SESSION['isAdmin'] == 1)) ? 'disabled' : '' ?> data-id="<?= $product['id'] ?>">-</a>
 
 
                                     <?php
@@ -517,14 +539,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' 
                                     ?>
 
                                     <!-- "+" Button -->
-                                    <a href="javascript:void(0);" class="btn btn-success text-center size-10 add-btn <?= $_SESSION['isAdmin'] == 1 ? 'disabled' : '' ?>" data-id="<?= $product['id']; ?>" data-stock="<?= $product['stock']; ?>">+</a>
+                                    <a href="javascript:void(0);" class="btn btn-success text-center size-10 add-btn <?= (!isset($_SESSION['user_id']) || (isset($_SESSION['isAdmin']) && $_SESSION['isAdmin'] == 1)) ? 'disabled' : '' ?>" <?= (!isset($_SESSION['user_id']) || (isset($_SESSION['isAdmin']) && $_SESSION['isAdmin'] == 1)) ? 'disabled' : '' ?>" data-id="<?= $product['id']; ?>" data-stock="<?= $product['stock']; ?>">+</a>
                                 </div>
 
+                                <?php if (!isset($_SESSION['user_id'])): ?>
+                                    <div class="bg-yellow-100 border-l-4 px-3 py-2 border-yellow-500 text-yellow-700 rounded-lg">
+                                        <p class="text-sm font-semibold">Login untuk menambahkan barang ke keranjang</p>
+                                    </div>
+                                <?php endif; ?>
+
                                 <!-- Hidden input untuk kirim quantity ke php -->
-                                <input type="hidden" id="hidden-quantity-<?= $product['id']; ?>" name="hidden-quantity-<?= $product['id']; ?>" value="0">
+                                <input type="hidden" id="hidden-quantity-<?= $product['id']; ?>" name="hidden-quantity-<?= $product['id']; ?>">
 
                                 <!-- Add to Cart Button -->
-                                <button type="submit" class="btn btn-primary px-5 py-2 rounded-lg text-sm <?= $_SESSION['isAdmin'] == 1 ? 'disabled' : '' ?>">Add To Cart</button>
+                                <button type="submit" class="btn btn-primary px-5 py-2 rounded-lg text-sm <?= (!isset($_SESSION['user_id']) || (isset($_SESSION['isAdmin']) && $_SESSION['isAdmin'] == 1)) ? 'disabled' : '' ?>" <?= (!isset($_SESSION['user_id']) || (isset($_SESSION['isAdmin']) && $_SESSION['isAdmin'] == 1)) ? 'disabled' : '' ?>>Add To Cart </button>
                         </form>
 
                     </div>
@@ -535,20 +563,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' 
 <?php
         }
 
-        // Hitung total_harga
-        $checkSum = $mysqli->prepare("SELECT SUM(d.jumlah_product * p.harga_satuan) AS total_price
+        if (isset($_SESSION['user_id'])) {
+            // Hitung total_harga
+            $checkSum = $mysqli->prepare("SELECT SUM(d.jumlah_product * p.harga_satuan) AS total_price
                                     FROM detailcheckout d
                                     JOIN products p ON d.product_id = p.product_id
                                     WHERE d.checkout_id = ?");
-        $checkSum->bind_param("i", $_SESSION['checkout_id']);
-        $checkSum->execute();
-        $checkResult = $checkSum->get_result();
+            $checkSum->bind_param("i", $_SESSION['checkout_id']);
+            $checkSum->execute();
+            $checkResult = $checkSum->get_result();
 
-        if ($row = $checkResult->fetch_assoc()) {
-            // Update total_harga
-            $priceUpdate = $mysqli->prepare("UPDATE checkout SET total_harga = ? WHERE checkout_id = ?");
-            $priceUpdate->bind_param("ii", $row['total_price'], $_SESSION['checkout_id']);
-            $priceUpdate->execute();
+            if ($row = $checkResult->fetch_assoc()) {
+                // Update total_harga
+                $priceUpdate = $mysqli->prepare("UPDATE checkout SET total_harga = ? WHERE checkout_id = ?");
+                $priceUpdate->bind_param("ii", $row['total_price'], $_SESSION['checkout_id']);
+                $priceUpdate->execute();
+            }
         }
 
 ?>

@@ -1,6 +1,10 @@
 <?php
 require_once "connect.php";
 session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php'); // Redirect to login page if not logged in
+}
 ?>
 
 <!doctype html>
@@ -84,7 +88,7 @@ session_start();
                             <form method="post">
                                 <div class="form-group mb-3">
                                     <label for="newImage">Link Gambar</label>
-                                    <input type="text" class="form-control" id="newImage" name="newImage" placeholder="Enter Image Address" required>
+                                    <input type="url" class="form-control" id="newImage" name="newImage" placeholder="Enter Image Address" required>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="newBarang">Nama barang</label>
@@ -92,7 +96,7 @@ session_start();
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="newHarga">Harga Satuan</label>
-                                    <input type="text" class="form-control" id="newHarga" name="newHarga" placeholder="Enter Harga Satuan" required>
+                                    <input type="number" class="form-control" id="newHarga" name="newHarga" placeholder="Enter Harga Satuan" required min="0" max="999999">
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="newDeskripsi">Deskripsi</label>
@@ -100,7 +104,7 @@ session_start();
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="newStock">Stock</label>
-                                    <input type="text" class="form-control" id="newStock" name="newStock" placeholder="Enter Stock" required>
+                                    <input type="number" class="form-control" id="newStock" name="newStock" placeholder="Enter Stock" required min="0" max="999999">
                                 </div>
                                 <div class="flex items-center pr-3 mb-3">
                                     <label class="font-medium text-gray-600 mr-4" for="kategori">Kategori : </label>
@@ -149,16 +153,6 @@ session_start();
 
         <section id="editAdmin" style="display: none;" class="my-8 mx-3">
             <?php
-            // set user yang akan di delete
-            if (isset($_GET['deleteUser'])) {
-                $userId = $_GET['deleteUser'];
-
-                // Delete user 
-                $stmt = $mysqli->prepare("DELETE FROM users WHERE user_id = ?");
-                $stmt->bind_param("i", $userId);
-                $stmt->execute();
-            }
-
             // updating user ke database
             if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
                 $userId = $_POST['user_id'];
@@ -170,8 +164,8 @@ session_start();
                 $isAdmin = $_POST['isAdmin'];
 
                 // Prepare query
-                $stmt = $mysqli->prepare("UPDATE users SET username = ?, password = ?, user_telp = ?, email = ?, alamat = ?, isAdmin = ? WHERE user_id = ?");
-                $stmt->bind_param("sssssii", $username, $password, $userTelp, $email, $alamat, $isAdmin, $userId);
+                $stmt = $mysqli->prepare("UPDATE users SET isAdmin = ? WHERE user_id = ?");
+                $stmt->bind_param("ii", $isAdmin, $userId);
 
                 // cek query
                 if ($stmt->execute()) {
@@ -188,34 +182,28 @@ session_start();
             echo '<thead>';
             echo '<tr class="bg-gray-200">';
             echo '<th class="border border-gray-300 px-4 py-2 text-left">Username</th>';
-            echo '<th class="border border-gray-300 px-4 py-2 text-left">Password</th>';
             echo '<th class="border border-gray-300 px-4 py-2 text-left">Telp</th>';
             echo '<th class="border border-gray-300 px-4 py-2 text-left">Email</th>';
             echo '<th class="border border-gray-300 px-4 py-2 text-left">Alamat</th>';
             echo '<th class="border border-gray-300 px-4 py-2 text-left">isAdmin</th>';
-            echo '<th class="border border-gray-300 px-4 py-2 text-center"></th>';
             echo '<th class="border border-gray-300 px-4 py-2 text-center"></th>';
             echo '</tr>';
             echo '</thead>';
             echo '<tbody>';
 
             // Fetch user list
-            $stmt = $mysqli->query("SELECT user_id, username, password, user_telp, email, alamat, isAdmin FROM users");
+            $stmt = $mysqli->query("SELECT user_id, username, user_telp, email, alamat, isAdmin FROM users");
             while ($row = $stmt->fetch_assoc()) {
                 $modalId = "usermodal" . $row['user_id'];
 
                 echo '<tr class="hover:bg-gray-100">';
                 echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['username']) . '</td>';
-                echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['password']) . '</td>';
                 echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['user_telp']) . '</td>';
                 echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['email']) . '</td>';
                 echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['alamat']) . '</td>';
                 echo '<td class="border border-gray-300 px-4 py-2">' . htmlentities($row['isAdmin']) . '</td>';
                 echo '<td class="border border-gray-300 py-2 text-center">
             <button class="btn btn-warning font-semibold" data-bs-toggle="modal" data-bs-target="#' . $modalId . '">Edit</button>
-        </td>';
-                echo '<td class="border border-gray-300 py-2 text-center">
-            <button class="btn btn-danger font-semibold" onclick="deleteUser(' . $row['user_id'] . ')">Delete</button>
         </td>';
                 echo '</tr>';
 
@@ -232,11 +220,10 @@ session_start();
                             <div class="">
                                 <form action="adminPage.php" method="POST">
                                     <input type="hidden" name="user_id" value="' . $row['user_id'] . '">
-                                    <label>Username</label><input class="pl-4 mb-4 form-control" type="text" name="username" value="' . htmlentities($row['username']) . '">
-                                    <label>Password</label><input  class="pl-4 mb-4 form-control" type="text" name="password" value="' . htmlentities($row['password']) . '">
-                                    <label>Telp</label><input  class="pl-4 mb-4 form-control" type="text" name="user_telp" value="' . htmlentities($row['user_telp']) . '">
-                                    <label>Email</label><input class="pl-4 mb-4 form-control" type="email" name="email" value="' . htmlentities($row['email']) . '">
-                                    <label>Alamat</label><input class="pl-4 mb-4 form-control" type="text" name="alamat" value="' . htmlentities($row['alamat']) . '">
+                                    <label class="">Username : </label><p class="mx-auto border boder-gray-500 p-2 mb-4" type="text" name="username">' . htmlentities($row['username']) . ' </p>
+                                    <label class="">Telp : </label><p class="mx-auto border boder-gray-500 p-2 mb-4" type="text" name="username">' . htmlentities($row['user_telp']) . ' </p>
+                                    <label class="">Email : </label><p class="mx-auto border boder-gray-500 p-2 mb-4" type="text" name="username">' . htmlentities($row['email']) . ' </p>
+                                    <label class="">Alamat : </label><p class="mx-auto border boder-gray-500 p-2 mb-4" type="text" name="username">' . htmlentities($row['alamat']) . ' </p>
                                     <label>IsAdmin</label><input class="pl-4 mb-4 form-control" type="text" name="isAdmin" value="' . htmlentities($row['isAdmin']) . '">
                                     <div class="flex justify-end">
                                     <input type="submit" class="btn btn-primary" value="Update User">
@@ -251,15 +238,6 @@ session_start();
             echo '</tbody>';
             echo '</table>';
             ?>
-
-            <script>
-                function deleteUser(userId) {
-                    // alert sebelum delete
-                    if (confirm("Are you sure you want to delete this user?")) {
-                        window.location.href = "adminPage.php?deleteUser=" + userId;
-                    }
-                }
-            </script>
         </section>
 
         <section id="listItem" style="display: none;">
@@ -298,11 +276,18 @@ session_start();
                                     <p class="card-text font-bold text-lg text-green-600">Rp. <?= number_format($product['price'], 0, ',', '.'); ?></p>
                                 </div>
                                 <div class="grid grid-cols-2">
-                                    <!-- Delete Form -->
-                                    <form method="post">
-                                        <input type="hidden" name="delete_product_id" value="<?= $product['id']; ?>">
-                                        <button type="submit" class="btn btn-danger mb-4 mr-auto ml-5 hover:text-white font-semibold">Delete</button>
-                                    </form>
+                                    <div id="product_<?= $product['id']; ?>" class="product-item">
+                                        <?php if ($product['stock'] > 0): ?>
+                                            <!--  jika stock ada, show Hide button -->
+                                            <form method="post">
+                                                <input type="hidden" name="product_id" value="<?= $product['id']; ?>">
+                                                <input type="hidden" name="action" value="hide">
+                                                <button type="submit" class="btn btn-danger mb-4 mr-auto ml-5 px-4 hover:text-white font-semibold">Hide</button>
+                                            </form>
+                                        <?php elseif ($product['stock'] == 0) : ?>
+                                            <p class="bg-danger rounded mb-4 mr-auto ml-5 px-4 py-2 text-sm text-white font-semibold text-center">Add Stock to Show</p>
+                                        <?php endif; ?>
+                                    </div>
 
                                     <!-- Edit Button -->
                                     <button class="btn btn-warning mb-4 ml-auto mr-5 px-4 hover:text-white font-semibold" data-bs-toggle="modal" data-bs-target="#<?= $modalId; ?>">Edit</button>
@@ -324,7 +309,7 @@ session_start();
                                                     <img class="rounded-lg shadow-md" src="<?= $product['image']; ?>" alt="Product image">
                                                     <div class="pt-4">
                                                         <label>Link Gambar</label>
-                                                        <textarea class="pl-4 form-control" type="text" rows="5" name="gambar"><?= htmlspecialchars($product['image']) ?></textarea>
+                                                        <textarea class="pl-4 form-control" type="url" rows="5" name="gambar"><?= htmlspecialchars($product['image']) ?></textarea>
                                                     </div>
                                                 </div>
 
@@ -336,18 +321,18 @@ session_start();
                                                     <input class="pl-4 form-control" type="text" name="nama_product" value="<?= $product['name'] ?>"><br>
 
                                                     <label>Harga Satuan</label>
-                                                    <input class="pl-4 form-control" type="text" name="harga_satuan" value="<?= $product['price'] ?>"><br>
+                                                    <input class="pl-4 form-control" type="number" name="harga_satuan" value="<?= $product['price'] ?>" min="0" max="999999"><br>
 
                                                     <label>Deskripsi Product</label>
                                                     <input class="pl-4 form-control" type="text" name="deskripsi" value="<?= $product['description'] ?>"><br>
 
                                                     <label>Stock Product</label>
-                                                    <input class="pl-4 form-control" type="text" name="stock_product" value="<?= $product['stock'] ?>"><br>
+                                                    <input class="pl-4 form-control" type="number" name="stock_product" value="<?= $product['stock'] ?>" min="0" max="999999"><br>
 
                                                     <!-- Category Dropdown -->
                                                     <div class="flex items-center pr-3 mb-3">
                                                         <label class="font-medium text-gray-600 mr-4" for="kategori">Kategori: </label>
-                                                        <select id="aaa" name="aaa" class="border-none bg-transparent rounded-lg focus:outline-none text-gray-700">
+                                                        <select name="kategori_id" class="border-none bg-transparent rounded-lg focus:outline-none text-gray-700">
                                                             <?php
                                                             $kategoriStmt = $mysqli->query("SELECT kategori_id, nama_kategori FROM kategori");
                                                             while ($row = $kategoriStmt->fetch_assoc()) {
@@ -376,49 +361,56 @@ session_start();
                     }
                 }
 
-                // Update Product in the database
-                if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['product_id']) && !isset($_POST['delete_product_id'])) {
-                    $id = $_POST['product_id'];
-                    $gambar = $_POST['gambar'];
-                    $nama_product = $_POST['nama_product'];
-                    $harga_satuan = $_POST['harga_satuan'];
-                    $deskripsi = $_POST['deskripsi'];
-                    $stock_product = $_POST['stock_product'];
-                    $kategori_id = $_POST['aaa'];
+                // post handling (product update and hide)
+                if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                    // Update product
+                    if (isset($_POST['product_id']) && !isset($_POST['action'])) {
+                        $id = $_POST['product_id'];
+                        $gambar = $_POST['gambar'];
+                        $nama_product = $_POST['nama_product'];
+                        $harga_satuan = $_POST['harga_satuan'];
+                        $deskripsi = $_POST['deskripsi'];
+                        $stock_product = $_POST['stock_product'];
+                        $kategori_id = $_POST['kategori_id'];
 
-                    // Prepare query to update product
-                    $sql = "UPDATE products SET gambar=?, nama_product=?, harga_satuan=?, deskripsi=?, stock_product=?, kategori_id=? WHERE product_id=?";
-                    $stmt = $mysqli->prepare($sql);
-                    $stmt->bind_param("ssisiii", $gambar, $nama_product, $harga_satuan, $deskripsi, $stock_product, $kategori_id, $id);
+                        // query update product
+                        $sql = "UPDATE products SET gambar=?, nama_product=?, harga_satuan=?, deskripsi=?, stock_product=?, kategori_id=? WHERE product_id=?";
+                        $stmt = $mysqli->prepare($sql);
+                        $stmt->bind_param("ssisiii", $gambar, $nama_product, $harga_satuan, $deskripsi, $stock_product, $kategori_id, $id);
 
-                    // Execute the query
-                    if ($stmt->execute()) {
-                        echo "<script>alert('Product updated successfully!');</script>";
-                    } else {
-                        echo "Error: " . $stmt->error;
+                        // Execute
+                        if ($stmt->execute()) {
+                            echo "<script>alert('Product updated successfully!');</script>";
+                        } else {
+                            echo "Error: " . $stmt->error;
+                        }
+                        $stmt->close();
+                        echo '<meta http-equiv="refresh" content="0">';
                     }
-                    $stmt->close();
-                    echo '<meta http-equiv="refresh" content="0">';
-                }
 
-                // Delete Product
-                if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_product_id'])) {
-                    $productId = $_POST['delete_product_id'];
+                    // Hide product
+                    if (isset($_POST['product_id']) && isset($_POST['action']) && $_POST['action'] === 'hide') {
+                        $productId = $_POST['product_id'];
 
-                    // Prepare and execute the delete query
-                    $stmt = $mysqli->prepare("DELETE FROM products WHERE product_id = ?");
-                    $stmt->bind_param("i", $productId);
-                    if ($stmt->execute()) {
-                        echo "<script>alert('Product deleted successfully!');</script>";
-                    } else {
-                        echo "Error deleting product: " . $stmt->error;
+                        // stock jadikan 0
+                        $sql = "UPDATE products SET stock_product = 0 WHERE product_id = ?";
+                        $stmt = $mysqli->prepare($sql);
+                        $stmt->bind_param('i', $productId);
+
+                        // Execute
+                        if ($stmt->execute()) {
+                            echo '<script>alert("Product has been hidden.");</script>';
+                        } else {
+                            echo '<script>alert("Error hiding the product: ' . $stmt->error . '");</script>';
+                        }
+                        $stmt->close();
+                        echo '<meta http-equiv="refresh" content="0">';
                     }
-                    $stmt->close();
-                    echo '<meta http-equiv="refresh" content="0">';
                 }
                 ?>
             </div>
         </section>
+
 </body>
 
 </html>

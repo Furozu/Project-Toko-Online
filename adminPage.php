@@ -71,6 +71,15 @@ if (!isset($_SESSION['user_id'])) {
                     a.style.display = "none";
                 }
             }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('.modal').forEach(function(modal) {
+                    modal.addEventListener('hidden.bs.modal', function() {
+                        // Reload the page to refresh data
+                        location.reload();
+                    });
+                });
+            });
         </script>
 
         <section id="createProduct">

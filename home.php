@@ -61,10 +61,11 @@ if (isset($_SESSION['user_id']) and $_SESSION['isAdmin'] != 1) {
 
     <!-- untuk JavaScript di dalam file html -->
     <script>
+        // refresh supaya data display dengan benar
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.modal').forEach(function(modal) {
                 modal.addEventListener('hidden.bs.modal', function() {
-                    // Reload the page to refresh data
+                    // refresh page
                     location.reload();
                 });
             });

@@ -175,18 +175,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == "addToCart"
 
             // quantity sebelum dan sekarang tidak boleh sama
             if ($quantity != null and $quantity != $quantityBef) {
-                if ($quantity == 0) {
-                    // kalo 0 hilang dari cart
-                    $deleteQuery2 = $mysqli->prepare("DELETE FROM detailCheckout WHERE detail_id = ?");
-                    $deleteQuery2->bind_param("i", $row['detail_id']);
-                    $deleteQuery2->execute();
-                } else if ($quantity > 0) {
+                if ($quantity > 0) {
                     // quantity bukan 0 
                     $updateCart = $mysqli->prepare("UPDATE detailcheckout SET jumlah_product = ? WHERE detail_id = ?");
                     $updateCart->bind_param("ii", $quantity, $row['detail_id']);
                     $updateCart->execute();
                 }
             }
+
+            if ($quantity == 0 and $quantity != $quantityBef) {
+                // kalo 0 hilang dari cart
+                $deleteQuery2 = $mysqli->prepare("DELETE FROM detailCheckout WHERE detail_id = ?");
+                $deleteQuery2->bind_param("i", $row['detail_id']);
+                $deleteQuery2->execute();
+            }
+            
         } else if ($quantity != 0) {
             // Kalo product blm ada di checkout user
             $insertStmt = $mysqli->prepare("INSERT INTO detailcheckout (checkout_id, product_id, jumlah_product) VALUES (?, ?, ?)");

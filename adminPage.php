@@ -224,7 +224,7 @@ if (!isset($_SESSION['user_id'])) {
                                     <label class="">Telp : </label><p class="mx-auto border boder-gray-500 p-2 mb-4" type="text" name="username">' . htmlentities($row['user_telp']) . ' </p>
                                     <label class="">Email : </label><p class="mx-auto border boder-gray-500 p-2 mb-4" type="text" name="username">' . htmlentities($row['email']) . ' </p>
                                     <label class="">Alamat : </label><p class="mx-auto border boder-gray-500 p-2 mb-4" type="text" name="username">' . htmlentities($row['alamat']) . ' </p>
-                                    <label>IsAdmin</label><input class="pl-4 mb-4 form-control" type="text" name="isAdmin" value="' . htmlentities($row['isAdmin']) . '">
+                                    <label>IsAdmin</label><input class="pl-4 mb-4 form-control" type="number" required min="0" max="1" name="isAdmin" value="' . htmlentities($row['isAdmin']) . '">
                                     <div class="flex justify-end">
                                     <input type="submit" class="btn btn-primary" value="Update User">
                                     </div>

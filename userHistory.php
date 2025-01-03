@@ -53,7 +53,7 @@ session_start();
                                                 JOIN users u ON c.user_id = u.user_id
                                                 JOIN payment p ON c.payment_id = p.payment_id
                                                 WHERE c.user_id = " . $_SESSION['user_id'] . "
-                                                ORDER BY c.date, c.checkout_id DESC ");
+                                                ORDER BY c.date DESC, c.checkout_id DESC ");
                         while ($row = $stmt->fetch_assoc()) {
 
                             $checkout = [

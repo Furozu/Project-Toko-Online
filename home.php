@@ -61,6 +61,15 @@ if (isset($_SESSION['user_id']) and $_SESSION['isAdmin'] != 1) {
 
     <!-- untuk JavaScript di dalam file html -->
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.modal').forEach(function(modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    // Reload the page to refresh data
+                    location.reload();
+                });
+            });
+        });
+
         // jQuery starter function
         $(document).ready(function() {
             // "." = isi class

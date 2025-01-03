@@ -56,7 +56,8 @@ session_start();
                         $stmt = $mysqli->query("SELECT c.checkout_id, c.date, c.user_id, u.username, c.total_harga, p.payment_method, c.status
                         FROM checkout c
                         JOIN users u ON c.user_id = u.user_id
-                        JOIN payment p ON c.payment_id = p.payment_id;");
+                        JOIN payment p ON c.payment_id = p.payment_id
+                        ORDER BY c.date DESC, c.checkout_id DESC;");
                         while ($row = $stmt->fetch_assoc()) {
 
                             // checkout data

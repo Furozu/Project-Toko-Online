@@ -71,6 +71,17 @@ if (isset($_SESSION['user_id']) and $_SESSION['isAdmin'] != 1) {
             });
         });
 
+        // No Selected Payment Alert Animation
+        setTimeout(() => {
+            const element = document.getElementById("payment-warning");
+            element.classList.add("-translate-y-full"); // slide-out ke atas
+            element.classList.add("opacity-0"); // fade out
+            setTimeout(() => {
+                element.classList.add("hidden");
+            }, 500); // 500ms sebelum hidden
+        }, 2000); // 3000ms = total waktu animasi
+
+
         // jQuery starter function
         $(document).ready(function() {
             // "." = isi class
@@ -155,7 +166,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName'])) {
 }
 
 // add item ke cart user
-if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == "addToCart" and isset($_POST['product_id'])) {
+if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName']) and $_POST['actionName'] == "addToCart" and isset($_POST['product_id'])) {
 
     if (isset($_POST['hidden-quantity-' . $_POST['product_id']])) {
         $quantity = (int)$_POST['hidden-quantity-' . $_POST['product_id']];
@@ -175,17 +186,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == "addToCart"
 
             // quantity sebelum dan sekarang tidak boleh sama
             if ($quantity != null and $quantity != $quantityBef) {
-                if ($quantity == 0) {
-                    // kalo 0 hilang dari cart
-                    $deleteQuery2 = $mysqli->prepare("DELETE FROM detailCheckout WHERE detail_id = ?");
-                    $deleteQuery2->bind_param("i", $row['detail_id']);
-                    $deleteQuery2->execute();
-                } else if ($quantity > 0) {
+                if ($quantity > 0) {
                     // quantity bukan 0 
                     $updateCart = $mysqli->prepare("UPDATE detailcheckout SET jumlah_product = ? WHERE detail_id = ?");
                     $updateCart->bind_param("ii", $quantity, $row['detail_id']);
                     $updateCart->execute();
                 }
+            }
+
+            if ($quantity == 0 and $quantity != $quantityBef) {
+                // kalo 0 hilang dari cart
+                $deleteQuery2 = $mysqli->prepare("DELETE FROM detailCheckout WHERE detail_id = ?");
+                $deleteQuery2->bind_param("i", $row['detail_id']);
+                $deleteQuery2->execute();
             }
         } else if ($quantity != 0) {
             // Kalo product blm ada di checkout user
@@ -221,9 +234,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName'])) {
 }
 
 // Checkout function (completed transaction)
-if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' and isset($_POST['payment']) and isset($_POST['haveItem'])) {
-    // TODO: check ada item yang out of order
+if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName']) and $_POST['actionName'] == 'checkout' and isset($_POST['payment']) and isset($_POST['haveItem'])) {
 
+    // No Selected Payment Method Alert Setter
+    if ($_SESSION['noPayment'] == 0 and $_POST['payment'] == 0 and $_POST['haveItem'] == TRUE and $_POST['availability'] == TRUE) {
+        $_SESSION['noPayment'] = 1;
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    }
 
     if ($_POST['payment'] != 0 and $_POST['haveItem'] == TRUE and $_POST['availability'] == TRUE) {
 
@@ -253,6 +271,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' 
         // refresh page
         echo '<meta http-equiv="refresh" content="0">';
     }
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['logout'])) {
+    session_unset();
+    session_destroy();
+    header('Location: login.php');
+    exit;
 }
 
 ?>
@@ -297,16 +322,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' 
         </div>
 
         <?php
-        // User Only
+        // No Login User
         if (!isset($_SESSION['user_id'])) {
             echo '<a href="login.php" type="button" class="hover:text-white btn btn-primary  font-semibold  px-5 py-2 rounded-lg text-sm ml-auto mr-14">Login</a>';
         }
+
+        // User Only
         if (isset($_SESSION['user_id']) and $_SESSION['isAdmin'] == 0) {
             echo '<button type="button" class="hover:text-white bg-yellow-400  font-semibold  px-5 py-2 rounded-lg text-sm ml-auto mr-14" data-bs-toggle="modal" data-bs-target="#checkout">Cart</button>';
+        }
+
+        // Admin Only 
+        if (isset($_SESSION['user_id']) and $_SESSION['isAdmin'] == 1) {
+            echo   '<form method="POST" class="d-inline ml-auto mr-14">
+                        <button type="submit" name="logout" class="btn btn-danger font-semibold px-5 py-2 rounded-lg text-sm text-white">Logout</button>
+                    </form>';
         }
         ?>
 
     </nav>
+
+
 
     <!-- Checkout Modal -->
     <div class="modal fade" id="checkout" tabindex="-1" role="dialog" aria-hidden="true">
@@ -429,8 +465,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' 
         </div>
     </div>
 
+    <?php
+    // No Selected Payment Method Alert Display
+    if (isset($_SESSION['noPayment']) and $_SESSION['noPayment'] == 1) {
+        echo    '<div id="payment-warning" class="m-3 bg-yellow-400 text-black text-lg font-medium rounded-md shadow-md transition-all duration-1000 ease-in-out">
+                    <p class="px-4 py-2 text-center">⚠️ No Selected Payment Method ⚠️</p>
+                </div>';
+        $_SESSION['noPayment'] = 0;
+    }
+    ?>
+
     <!-- Kategori + Search Bar  -->
     <div class="m-3">
+
         <form id="filter" class="flex items-center bg-gray-100 rounded-lg shadow-md px-4 py-2 space-x-3" method="POST">
             <input type="hidden" name="actionName" value="searchBar">
 

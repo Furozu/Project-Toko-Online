@@ -71,15 +71,6 @@ if (!isset($_SESSION['user_id'])) {
                     a.style.display = "none";
                 }
             }
-
-            document.addEventListener('DOMContentLoaded', function() {
-                document.querySelectorAll('.modal').forEach(function(modal) {
-                    modal.addEventListener('hidden.bs.modal', function() {
-                        // Reload the page to refresh data
-                        location.reload();
-                    });
-                });
-            });
         </script>
 
         <section id="createProduct">
@@ -233,7 +224,7 @@ if (!isset($_SESSION['user_id'])) {
                                     <label class="">Telp : </label><p class="mx-auto border boder-gray-500 p-2 mb-4" type="text" name="username">' . htmlentities($row['user_telp']) . ' </p>
                                     <label class="">Email : </label><p class="mx-auto border boder-gray-500 p-2 mb-4" type="text" name="username">' . htmlentities($row['email']) . ' </p>
                                     <label class="">Alamat : </label><p class="mx-auto border boder-gray-500 p-2 mb-4" type="text" name="username">' . htmlentities($row['alamat']) . ' </p>
-                                    <label>IsAdmin</label><input class="pl-4 mb-4 form-control" type="text" name="isAdmin" value="' . htmlentities($row['isAdmin']) . '">
+                                    <label>IsAdmin</label><input class="pl-4 mb-4 form-control" type="number" required min="0" max="1" name="isAdmin" value="' . htmlentities($row['isAdmin']) . '">
                                     <div class="flex justify-end">
                                     <input type="submit" class="btn btn-primary" value="Update User">
                                     </div>
@@ -294,7 +285,11 @@ if (!isset($_SESSION['user_id'])) {
                                                 <button type="submit" class="btn btn-danger mb-4 mr-auto ml-5 px-4 hover:text-white font-semibold">Hide</button>
                                             </form>
                                         <?php elseif ($product['stock'] == 0) : ?>
-                                            <p class="bg-danger rounded mb-4 mr-auto ml-5 px-4 py-2 text-sm text-white font-semibold text-center">Add Stock to Show</p>
+                                            <div class="bg-yellow-100 border-l-4 mx-3 py-2 border-yellow-500 text-yellow-700 rounded-lg">
+                                                <p class="text-sm font-semibold pl-4">
+                                                    Add Stock to Show
+                                                </p>
+                                            </div>
                                         <?php endif; ?>
                                     </div>
 

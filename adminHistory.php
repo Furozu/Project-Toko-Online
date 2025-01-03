@@ -56,7 +56,8 @@ session_start();
                         $stmt = $mysqli->query("SELECT c.checkout_id, c.date, c.user_id, u.username, c.total_harga, p.payment_method, c.status
                         FROM checkout c
                         JOIN users u ON c.user_id = u.user_id
-                        JOIN payment p ON c.payment_id = p.payment_id;");
+                        JOIN payment p ON c.payment_id = p.payment_id
+                        ORDER BY c.checkout_id DESC;");
                         while ($row = $stmt->fetch_assoc()) {
 
                             // checkout data
@@ -84,8 +85,7 @@ session_start();
                                         $stmt_detail = $mysqli->prepare("SELECT d.detail_id, p.nama_product, d.jumlah_product, p.harga_satuan
                                                  FROM detailcheckout d
                                                  JOIN products p ON d.product_id = p.product_id
-                                                 WHERE d.checkout_id = ?
-                                                 ORDER BY d.checkout_id DESC");
+                                                 WHERE d.checkout_id = ?");
                                         $stmt_detail->bind_param("i", $checkout['id']);
                                         $stmt_detail->execute();
                                         $result_detail = $stmt_detail->get_result();

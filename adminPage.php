@@ -294,7 +294,11 @@ if (!isset($_SESSION['user_id'])) {
                                                 <button type="submit" class="btn btn-danger mb-4 mr-auto ml-5 px-4 hover:text-white font-semibold">Hide</button>
                                             </form>
                                         <?php elseif ($product['stock'] == 0) : ?>
-                                            <p class="bg-danger rounded mb-4 mr-auto ml-5 px-4 py-2 text-sm text-white font-semibold text-center">Add Stock to Show</p>
+                                            <div class="bg-yellow-100 border-l-4 mx-3 py-2 border-yellow-500 text-yellow-700 rounded-lg">
+                                                <p class="text-sm font-semibold pl-4">
+                                                    Add Stock to Show
+                                                </p>
+                                            </div>
                                         <?php endif; ?>
                                     </div>
 

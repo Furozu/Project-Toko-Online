@@ -71,6 +71,17 @@ if (isset($_SESSION['user_id']) and $_SESSION['isAdmin'] != 1) {
             });
         });
 
+        // No Selected Payment Alert Animation
+        setTimeout(() => {
+            const element = document.getElementById("payment-warning");
+            element.classList.add("-translate-y-full"); // slide-out ke atas
+            element.classList.add("opacity-0"); // fade out
+            setTimeout(() => {
+                element.classList.add("hidden");
+            }, 500); // 500ms sebelum hidden
+        }, 2000); // 3000ms = total waktu animasi
+
+
         // jQuery starter function
         $(document).ready(function() {
             // "." = isi class
@@ -225,9 +236,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName'])) {
 // Checkout function (completed transaction)
 if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' and isset($_POST['payment']) and isset($_POST['haveItem'])) {
 
-    if ($_POST['payment'] == 0 and $_POST['haveItem'] == TRUE and $_POST['availability'] == TRUE) {
-        // TODO: change to a simple notif, disapear after 5 second
-
+    // No Selected Payment Method Alert Setter
+    if ($_SESSION['noPayment'] == 0 and $_POST['payment'] == 0 and $_POST['haveItem'] == TRUE and $_POST['availability'] == TRUE) {
+        $_SESSION['noPayment'] = 1;
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
     }
 
     if ($_POST['payment'] != 0 and $_POST['haveItem'] == TRUE and $_POST['availability'] == TRUE) {
@@ -452,8 +465,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['logout'])) {
         </div>
     </div>
 
+    <?php
+    // No Selected Payment Method Alert Display
+    if (isset($_SESSION['noPayment']) and $_SESSION['noPayment'] == 1) {
+        echo    '<div id="payment-warning" class="m-3 bg-yellow-400 text-black text-lg font-medium rounded-md shadow-md transition-all duration-1000 ease-in-out">
+                    <p class="px-4 py-2 text-center">⚠️ No Selected Payment Method ⚠️</p>
+                </div>';
+        $_SESSION['noPayment'] = 0;
+    }
+    ?>
+
     <!-- Kategori + Search Bar  -->
     <div class="m-3">
+
         <form id="filter" class="flex items-center bg-gray-100 rounded-lg shadow-md px-4 py-2 space-x-3" method="POST">
             <input type="hidden" name="actionName" value="searchBar">
 

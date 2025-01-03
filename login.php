@@ -132,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['newUsername']) && isse
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="newTelpon">Nomer Telpon</label>
-                                    <input type="text" class="form-control" id="newTelpon" name="newTelpon" placeholder="Enter Nomer Telpon" required>
+                                    <input type="number" class="form-control" id="newTelpon" name="newTelpon" placeholder="Enter Nomer Telpon" required>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="newEmail">Email</label>

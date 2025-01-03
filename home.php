@@ -166,7 +166,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName'])) {
 }
 
 // add item ke cart user
-if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == "addToCart" and isset($_POST['product_id'])) {
+if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName']) and $_POST['actionName'] == "addToCart" and isset($_POST['product_id'])) {
 
     if (isset($_POST['hidden-quantity-' . $_POST['product_id']])) {
         $quantity = (int)$_POST['hidden-quantity-' . $_POST['product_id']];
@@ -234,7 +234,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName'])) {
 }
 
 // Checkout function (completed transaction)
-if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' and isset($_POST['payment']) and isset($_POST['haveItem'])) {
+if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName']) and $_POST['actionName'] == 'checkout' and isset($_POST['payment']) and isset($_POST['haveItem'])) {
 
     // No Selected Payment Method Alert Setter
     if ($_SESSION['noPayment'] == 0 and $_POST['payment'] == 0 and $_POST['haveItem'] == TRUE and $_POST['availability'] == TRUE) {

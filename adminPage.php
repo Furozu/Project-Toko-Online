@@ -96,7 +96,7 @@ if (!isset($_SESSION['user_id'])) {
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="newHarga">Harga Satuan</label>
-                                    <input type="number" class="form-control" id="newHarga" name="newHarga" placeholder="Enter Harga Satuan" required min="1" max="999999">
+                                    <input type="number" class="form-control" id="newHarga" name="newHarga" placeholder="Enter Harga Satuan" required min="0" max="999999">
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="newDeskripsi">Deskripsi</label>

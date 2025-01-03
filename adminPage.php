@@ -71,6 +71,15 @@ if (!isset($_SESSION['user_id'])) {
                     a.style.display = "none";
                 }
             }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('.modal').forEach(function(modal) {
+                    modal.addEventListener('hidden.bs.modal', function() {
+                        // Reload the page to refresh data
+                        location.reload();
+                    });
+                });
+            });
         </script>
 
         <section id="createProduct">
@@ -84,7 +93,7 @@ if (!isset($_SESSION['user_id'])) {
                         </div>
 
                         <div class="modal-body">
-                            <!-- Form for creating a new account -->
+                            <!-- Form for creating a new product -->
                             <form method="post">
                                 <div class="form-group mb-3">
                                     <label for="newImage">Link Gambar</label>
@@ -309,25 +318,25 @@ if (!isset($_SESSION['user_id'])) {
                                                     <img class="rounded-lg shadow-md" src="<?= $product['image']; ?>" alt="Product image">
                                                     <div class="pt-4">
                                                         <label>Link Gambar</label>
-                                                        <textarea class="pl-4 form-control" type="url" rows="5" name="gambar"><?= htmlspecialchars($product['image']) ?></textarea>
+                                                        <textarea class="pl-4 form-control" type="url" rows="5" name="gambar" required><?= htmlspecialchars($product['image']) ?></textarea>
                                                     </div>
                                                 </div>
 
                                                 <!-- Details Section -->
                                                 <div class="">
-                                                    <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
+                                                    <input type="hidden" name="product_id" value="<?= $product['id'] ?>" required>
 
                                                     <label>Nama Product</label>
-                                                    <input class="pl-4 form-control" type="text" name="nama_product" value="<?= $product['name'] ?>"><br>
+                                                    <input class="pl-4 form-control" type="text" name="nama_product" value="<?= $product['name'] ?>" required><br>
 
                                                     <label>Harga Satuan</label>
-                                                    <input class="pl-4 form-control" type="number" name="harga_satuan" value="<?= $product['price'] ?>" min="0" max="999999"><br>
+                                                    <input class="pl-4 form-control" type="number" name="harga_satuan" value="<?= $product['price'] ?>" required min="0" max="999999"><br>
 
                                                     <label>Deskripsi Product</label>
-                                                    <input class="pl-4 form-control" type="text" name="deskripsi" value="<?= $product['description'] ?>"><br>
+                                                    <input class="pl-4 form-control" type="text" name="deskripsi" value="<?= $product['description'] ?>" required><br>
 
                                                     <label>Stock Product</label>
-                                                    <input class="pl-4 form-control" type="number" name="stock_product" value="<?= $product['stock'] ?>" min="0" max="999999"><br>
+                                                    <input class="pl-4 form-control" type="number" name="stock_product" value="<?= $product['stock'] ?>" min="0" max="999999" required><br>
 
                                                     <!-- Category Dropdown -->
                                                     <div class="flex items-center pr-3 mb-3">

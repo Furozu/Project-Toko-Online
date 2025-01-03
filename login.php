@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['newUsername']) && isse
 }
 ?>
 
-<body>
+<body class="h-screen flex items-center justify-center">
     <section class="p-10 grid grid-cols-2 gap-10 place-items-center">
         <div>
             <p class="text-9xl font-bold">Toko Online</p>
@@ -154,7 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['newUsername']) && isse
     </section>
 
     <!-- Tabel Users -->
-    <section class="container mx-auto my-10">
+    <section class="container mx-auto my-10" hidden>
         <h1>Tabel Users (nanti di hide)</h1>
         <?php
         echo '<table class="table-auto w-full border-collapse border border-gray-300">';

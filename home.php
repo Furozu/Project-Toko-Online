@@ -189,7 +189,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == "addToCart"
                 $deleteQuery2->bind_param("i", $row['detail_id']);
                 $deleteQuery2->execute();
             }
-            
         } else if ($quantity != 0) {
             // Kalo product blm ada di checkout user
             $insertStmt = $mysqli->prepare("INSERT INTO detailcheckout (checkout_id, product_id, jumlah_product) VALUES (?, ?, ?)");
@@ -225,8 +224,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName'])) {
 
 // Checkout function (completed transaction)
 if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' and isset($_POST['payment']) and isset($_POST['haveItem'])) {
-    // TODO: check ada item yang out of order
 
+    if ($_POST['payment'] == 0 and $_POST['haveItem'] == TRUE and $_POST['availability'] == TRUE) {
+        // TODO: change to a simple notif, disapear after 5 second
+
+    }
 
     if ($_POST['payment'] != 0 and $_POST['haveItem'] == TRUE and $_POST['availability'] == TRUE) {
 
@@ -256,6 +258,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' 
         // refresh page
         echo '<meta http-equiv="refresh" content="0">';
     }
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['logout'])) {
+    session_unset();
+    session_destroy();
+    header('Location: login.php');
+    exit;
 }
 
 ?>
@@ -300,16 +309,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and $_POST['actionName'] == 'checkout' 
         </div>
 
         <?php
-        // User Only
+        // No Login User
         if (!isset($_SESSION['user_id'])) {
             echo '<a href="login.php" type="button" class="hover:text-white btn btn-primary  font-semibold  px-5 py-2 rounded-lg text-sm ml-auto mr-14">Login</a>';
         }
+
+        // User Only
         if (isset($_SESSION['user_id']) and $_SESSION['isAdmin'] == 0) {
             echo '<button type="button" class="hover:text-white bg-yellow-400  font-semibold  px-5 py-2 rounded-lg text-sm ml-auto mr-14" data-bs-toggle="modal" data-bs-target="#checkout">Cart</button>';
+        }
+
+        // Admin Only 
+        if (isset($_SESSION['user_id']) and $_SESSION['isAdmin'] == 1) {
+            echo   '<form method="POST" class="d-inline ml-auto mr-14">
+                        <button type="submit" name="logout" class="btn btn-danger font-semibold px-5 py-2 rounded-lg text-sm text-white">Logout</button>
+                    </form>';
         }
         ?>
 
     </nav>
+
+
 
     <!-- Checkout Modal -->
     <div class="modal fade" id="checkout" tabindex="-1" role="dialog" aria-hidden="true">

@@ -76,10 +76,6 @@ if (isset($_POST['logout'])) {
                 <div><strong>Alamat:</strong> <?php echo htmlspecialchars($user_data['alamat']); ?></div>
                 <a href="edit.php?field=alamat" class="btn btn-outline-primary btn-sm">Edit</a>
             </div>
-
-            <form method="POST" class="text-center mt-4">
-                <button type="submit" name="logout" class="btn btn-danger">Logout</button>
-            </form>
         </div>
     </section>
 </body>

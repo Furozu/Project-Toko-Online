@@ -84,7 +84,8 @@ session_start();
                                         $stmt_detail = $mysqli->prepare("SELECT d.detail_id, p.nama_product, d.jumlah_product, p.harga_satuan
                                                  FROM detailcheckout d
                                                  JOIN products p ON d.product_id = p.product_id
-                                                 WHERE d.checkout_id = ?");
+                                                 WHERE d.checkout_id = ?
+                                                 ORDER BY d.checkout_id DESC");
                                         $stmt_detail->bind_param("i", $checkout['id']);
                                         $stmt_detail->execute();
                                         $result_detail = $stmt_detail->get_result();

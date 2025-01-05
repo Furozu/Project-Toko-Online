@@ -132,31 +132,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="card p-4 rounded-0">
             <form method="post">
             <form method="post">
-                <!-- Username Field -->
                 <div class="mb-3">
                     <label for="username" class="form-label">Username:</label>
                     <input type="text" name="username" id="username" class="form-control" value="<?php echo htmlspecialchars($user_data['username']); ?>">
                 </div>
-
-                <!-- Phone Number Field -->
                 <div class="mb-3">
                     <label for="user_telp" class="form-label">No. Telpon:</label>
                     <input type="text" name="user_telp" id="user_telp" class="form-control" value="<?php echo htmlspecialchars($user_data['user_telp']); ?>">
                 </div>
-
-                <!-- Email Field -->
                 <div class="mb-3">
                     <label for="email" class="form-label">Email:</label>
                     <input type="email" name="email" id="email" class="form-control" value="<?php echo htmlspecialchars($user_data['email']); ?>">
                 </div>
-
-                <!-- Address Field -->
                 <div class="mb-3">
                     <label for="alamat" class="form-label">Alamat:</label>
                     <input type="text" name="alamat" id="alamat" class="form-control" value="<?php echo htmlspecialchars($user_data['alamat']); ?>">
                 </div>
                 <button type="submit" class="btn btn-success" style="float: right">Save</button>
-                <button type="button" class="btn btn-primary btn-dark btn-sm text-yellow-400 hover:text-white mt-3 d-inline-block" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</button>
+                <button type="button" class="btn btn-primary btn-sm mt-3 d-inline-block" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</button>
             </form>
         </div>
     </div>

@@ -168,7 +168,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName'])) {
 // add item ke cart user
 if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName']) and $_POST['actionName'] == "addToCart" and isset($_POST['product_id'])) {
 
-    if (isset($_POST['hidden-quantity-' . $_POST['product_id']])) {
+    if (isset($_POST['hidden-quantity-' . $_POST['product_id']]) and $_POST['hidden-quantity-' . $_POST['product_id']] != null) {
         $quantity = (int)$_POST['hidden-quantity-' . $_POST['product_id']];
 
         // Check if the product already exists in the cart (detailcheckout)

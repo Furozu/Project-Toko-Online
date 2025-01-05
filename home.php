@@ -2,11 +2,11 @@
 require_once "connect.php";
 session_start();
 
-
 $where = '';
 $setKategori = '';
 $and = '';
 $setSearch = '';
+$_SESSION['noPayment'] = 2;
 
 // Check apakah user punya checkout pending
 if (isset($_SESSION['user_id']) and $_SESSION['isAdmin'] != 1) {
@@ -168,7 +168,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName'])) {
 // add item ke cart user
 if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName']) and $_POST['actionName'] == "addToCart" and isset($_POST['product_id'])) {
 
-    if (isset($_POST['hidden-quantity-' . $_POST['product_id']])) {
+    if (isset($_POST['hidden-quantity-' . $_POST['product_id']]) and $_POST['hidden-quantity-' . $_POST['product_id']] != null) {
         $quantity = (int)$_POST['hidden-quantity-' . $_POST['product_id']];
 
         // Check if the product already exists in the cart (detailcheckout)
@@ -237,10 +237,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" and isset($_POST['actionName']) and $_POST['actionName'] == 'checkout' and isset($_POST['payment']) and isset($_POST['haveItem'])) {
 
     // No Selected Payment Method Alert Setter
-    if ($_SESSION['noPayment'] == 0 and $_POST['payment'] == 0 and $_POST['haveItem'] == TRUE and $_POST['availability'] == TRUE) {
+    if (isset($_SESSION['noPayment']) and $_SESSION['noPayment'] == 0 and $_POST['payment'] == 0 and $_POST['haveItem'] == TRUE and $_POST['availability'] == TRUE) {
         $_SESSION['noPayment'] = 1;
         header("Location: " . $_SERVER['PHP_SELF']);
         exit();
+    } elseif ($_SESSION['noPayment'] == 2 and $_POST['payment'] == 0) {
+        // untuk check pertama
+        $_SESSION['noPayment'] = 1;
     }
 
     if ($_POST['payment'] != 0 and $_POST['haveItem'] == TRUE and $_POST['availability'] == TRUE) {

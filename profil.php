@@ -93,28 +93,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php 
     include 'nav.php'; 
     ?>
-
+    
     <div class="container py-5">
-        <h1 class="mb-4">Edit Profile</h1>
-        <div class="card p-4">
+        <h1 class="mb-0 bg-dark text-warning p-3">Profile Page</h1>
+        <div class="card p-4 rounded-0">
             <?php foreach ($user_data as $field => $value): ?>
                 <div class="mb-3">
                     <strong><?php echo ucfirst($field); ?>:</strong>
                     <span class="view-section" id="view-<?php echo $field; ?>">
                         <?php echo htmlspecialchars($value); ?>
-                        <button class="btn btn-outline-primary btn-sm edit-btn" data-field="<?php echo $field; ?>">Edit</button>
+                        <button class="btn btn-dark btn-sm text-yellow-400 hover:text-white edit-btn" style="float: right" data-field="<?php echo $field; ?>">Edit</button>
                     </span>
                     <form class="edit-section" id="edit-<?php echo $field; ?>" method="post">
                         <input type="hidden" name="field" value="<?php echo $field; ?>">
                         <input type="text" name="value" class="form-control d-inline-block w-50" value="<?php echo htmlspecialchars($value); ?>">
                         <button type="submit" class="btn btn-success btn-sm">Save</button>
-                        <button type="submit" class="btn btn-secondary btn-sm cancel-btn">Cancel</button>
+                        <button type="submit" class="btn btn-warning btn-sm cancel-btn">Cancel</button>
                     </form>
                 </div>
             <?php endforeach; ?>
         </div>
     </div>
-
     <!-- Modal for error messages -->
     <?php if ($emailErr): ?>
         <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
@@ -149,7 +148,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 document.getElementById('edit-' + field).style.display = 'block';
             });
         });
-
         document.querySelectorAll('.cancel-btn').forEach(button => {
             button.addEventListener('click', function () {
                 const field = this.getAttribute('data-field');
@@ -158,7 +156,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
         });
     </script>
-
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

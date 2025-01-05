@@ -24,40 +24,44 @@ if (!$user_data) {
 $emailErr = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $field = $_POST['field'];
-    $value = $_POST['value'];
+    if (isset($_POST['field']) && isset($_POST['value'])) {
+        $field = $_POST['field'];
+        $value = $_POST['value'];
 
-    // Validate email
-    if ($field === 'email') {
-        $email = filter_var($value, FILTER_SANITIZE_EMAIL);
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $emailErr = "Invalid email format";
-        } else {
-            $value = $email;
+        // Validate email
+        if ($field === 'email') {
+            $email = filter_var($value, FILTER_SANITIZE_EMAIL);
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $emailErr = "Invalid email format";
+            } else {
+                $value = $email;
+            }
         }
-    }
-    
-    // Validate phone number
-    if ($field === 'user_telp') {
-        $phone = filter_var($value, FILTER_SANITIZE_NUMBER_INT);
-        if (!preg_match('/^\+?[0-9]{10,15}$/', $phone)) {
-            $emailErr = "Invalid phone number format"; 
-        } else {
-            $value = $phone;
+        
+        // Validate phone number
+        if ($field === 'user_telp') {
+            $phone = filter_var($value, FILTER_SANITIZE_NUMBER_INT);
+            if (!preg_match('/^\+?[0-9]{10,15}$/', $phone)) {
+                $emailErr = "Invalid phone number format"; 
+            } else {
+                $value = $phone;
+            }
         }
-    }
 
-    if (!isset($emailErr) || $emailErr === "") {
-        $updateQuery = "UPDATE Users SET $field = ? WHERE user_id = ?";
-        $updateStmt = $mysqli->prepare($updateQuery);
-        if (!$updateStmt) {
-            die("Failed to prepare statement: " . $mysqli->error);
-        }
-        $updateStmt->bind_param("si", $value, $user_id);
-        $updateStmt->execute();
+        if (!$emailErr) {
+            $updateQuery = "UPDATE Users SET $field = ? WHERE user_id = ?";
+            $updateStmt = $mysqli->prepare($updateQuery);
+            if (!$updateStmt) {
+                die("Failed to prepare statement: " . $mysqli->error);
+            }
+            $updateStmt->bind_param("si", $value, $user_id);
+            $updateStmt->execute();
 
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit;
+            header("Location: " . $_SERVER['PHP_SELF']);
+            exit;
+        }
+    } else {
+        $emailErr = "Missing required data.";
     }
 }
 ?>

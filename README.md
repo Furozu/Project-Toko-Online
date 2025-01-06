@@ -6,7 +6,7 @@ Insert data to database..................(done)
 Connect website with database............(done)
 Create customer view website.............(done)
 Create admin view website................(done)
-Create all function with PHP.............(on progress...)
+Create all function with PHP.............(done)
 
-Testing Phase............................(on progress...)
+Bug Testing Phase............................(done)
 ```

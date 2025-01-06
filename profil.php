@@ -27,41 +27,54 @@ $validationError = "";
 $successMsg = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        if (isset($_POST['current_password'], $_POST['new_password'], $_POST['confirm_password'])) {
-            $currentPassword = $_POST['current_password'];
-            $newPassword = $_POST['new_password'];
-            $confirmPassword = $_POST['confirm_password'];
-            if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
-                $validationError = "All fields are required.";
-            } else {
-                $passwordQuery = "SELECT password FROM users WHERE user_id = ?";
-                $passwordStmt = $mysqli->prepare($passwordQuery);
-                $passwordStmt->bind_param("i", $user_id);
-                $passwordStmt->execute();
-                $passwordResult = $passwordStmt->get_result();
-                $passwordData = $passwordResult->fetch_assoc();
-                if ($passwordData) {
-                    if (!$currentPassword === $passwordData['password']) {
-                        $updateQuery = "UPDATE users SET password = ? WHERE user_id = ?";
-                        $updateStmt = $mysqli->prepare($updateQuery);
-                        $updateStmt->bind_param("si", $newPassword, $user_id);
-                        if ($updateStmt->execute()) {
-                            $successMsg = "Password updated successfully.";
-                        } elseif ($newPassword !== $confirmPassword) {
-                            $validationError = "New passwords do not match.";
-                        } else {
-                            $validationError = "Error updating password.";
-                        }
-                    } else {
-                        $validationError = "Current password is incorrect.";
-                    }
-                } else {
-                    $validationError = "User not found.";
-                }
+    if (isset($_POST['current_password'], $_POST['new_password'], $_POST['confirm_password'])) {
+        $currentPassword = $_POST['current_password'];
+        $newPassword = $_POST['new_password'];
+        $confirmPassword = $_POST['confirm_password'];
+    
+        // Check if any field is empty
+        if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
+            $validationError = "All fields are required.";
+        } else {
+            // Fetch the stored password
+            $passwordQuery = "SELECT password FROM users WHERE user_id = ?";
+            $passwordStmt = $mysqli->prepare($passwordQuery);
+            if (!$passwordStmt) {
+                die("Failed to prepare statement: " . $mysqli->error);
             }
-            $passwordChangeStatus = $successMsg;
+            $passwordStmt->bind_param("i", $user_id);
+            $passwordStmt->execute();
+            $passwordResult = $passwordStmt->get_result();
+            $passwordData = $passwordResult->fetch_assoc();
+    
+            if ($passwordData) {
+                $storedPassword = $passwordData['password'];
+    
+                // Verify the current password
+                if ($currentPassword !== $storedPassword) {
+                    $validationError = "Current password is incorrect.";
+                } elseif ($newPassword !== $confirmPassword) {
+                    $validationError = "New passwords do not match.";
+                } else {
+                    // Update the password
+                    $updateQuery = "UPDATE users SET password = ? WHERE user_id = ?";
+                    $updateStmt = $mysqli->prepare($updateQuery);
+                    if (!$updateStmt) {
+                        die("Failed to prepare statement: " . $mysqli->error);
+                    }
+                    $updateStmt->bind_param("si", $newPassword, $user_id);
+    
+                    if ($updateStmt->execute()) {
+                        $successMsg = "Password updated successfully.";
+                    } else {
+                        $validationError = "Error updating password.";
+                    }
+                }
+            } else {
+                $validationError = "User not found.";
+            }
         }
+        $passwordChangeStatus = $successMsg;
     }
     $updatedFields = [];
     foreach ($user_data as $field => $value) {

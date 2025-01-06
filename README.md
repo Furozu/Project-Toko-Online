@@ -8,5 +8,5 @@ Create customer view website.............(done)
 Create admin view website................(done)
 Create all function with PHP.............(done)
 
-Bug Testing Phase............................(done)
+Bug Testing Phase........................(done)
 ```
